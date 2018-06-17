@@ -32,6 +32,7 @@
 #include "Simulation/simulator_interfaces/eclsimulator.h"
 #include "Simulation/simulator_interfaces/adgprssimulator.h"
 #include "Utilities/math.hpp"
+#include "Optimization/objective/NPV.h"
 
 namespace Runner {
 

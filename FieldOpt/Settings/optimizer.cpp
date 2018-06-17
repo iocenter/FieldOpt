@@ -130,6 +130,35 @@ Optimizer::Optimizer(QJsonObject json_optimizer)
                 objective_.weighted_sum.append(component);
             }
         }
+
+        else if (QString::compare(objective_type, "NPV") == 0) {
+            // -------------------------------------------------
+            objective_.type = ObjectiveType::NPV;
+            objective_.NPV_sum = QList<Objective::NPVComponent>();
+            // ---------------------------------------------------
+            QJsonArray json_components =
+                    json_objective["NPVComponents"].toArray();
+            // ---------------------------------------------------
+            for (int i = 0; i < json_components.size(); ++i) {
+                // -------------------------------------------------
+                Objective::NPVComponent component;
+                component.coefficient =
+                        json_components.at(i).toObject()["Coefficient"].toDouble();
+                component.property =
+                        json_components.at(i).toObject()["Property"].toString();
+                // -------------------------------------------------
+                if (json_components.at(i).toObject()["IsWellProp"].toBool()) {
+                    // -----------------------------------------------
+                    component.is_well_prop = true;
+                    component.well =
+                            json_components.at(i).toObject()["Well"].toString();
+                } else { component.is_well_prop = false; }
+                // -------------------------------------------------
+                component.time_step =
+                        json_components.at(i).toObject()["TimeStep"].toInt();
+                objective_.NPV_sum.append(component);
+            }
+        }
         else throw UnableToParseOptimizerObjectiveSectionException("Objective type " + objective_type.toStdString() + " not recognized");
         if (json_objective.contains("UsePenaltyFunction")) {
             objective_.use_penalty_function = json_objective["UsePenaltyFunction"].toBool();

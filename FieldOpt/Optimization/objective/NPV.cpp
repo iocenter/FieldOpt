@@ -55,6 +55,17 @@ NPV::NPV(Settings::Optimizer *settings,
 double NPV::value() const
 {
     double value = 0;
+
+    auto report_times = results_->GetValueVector(results_->Time);
+    for (int k = 0; k < components_->size(); ++k){
+        for (int j = 0; j < report_times.size(); j++) {
+            if (abs(report_times.at(j) - components_->at(k)->time_step) < 0.1) {
+                components_->at(k)->time_step = j;
+                cout << "Time_step :" << j << "    Report_time: " << report_times.at(j) << endl;
+                break;
+            }
+        }
+    }
     for (int i = 0; i < components_->size(); ++i) {
         value += components_->at(i)->resolveValue(results_);
         if (settings_->verb_vector()[5] > 1) { // idx:6 -> mod (Model)
