@@ -17,39 +17,47 @@
    along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
+// ---------------------------------------------------------
 #ifndef SETTINGS_OPTIMIZER_H
 #define SETTINGS_OPTIMIZER_H
 
+// ---------------------------------------------------------
 #include "settings.h"
 
 #include <QList>
 #include <QString>
 #include <QStringList>
 
+// ---------------------------------------------------------
 namespace Settings {
 
+// ---------------------------------------------------------
 /*!
- * \brief The Optimizer class contains optimizer-specific settings. Optimizer settings objects
- * may _only_ be created by the Settings class. They are created when reading a
- * JSON-formatted "driver file".
+ * \brief The Optimizer class contains optimizer-specific settings.
+ * Optimizer settings objects may _only_ be created by the Settings
+ * class. They are created when reading a JSON-formatted "driver file".
+ *
  */
 class Optimizer
 {
   friend class Settings;
 
  public:
+  // -------------------------------------------------------
   Optimizer(){}
   Optimizer(QJsonObject json_optimizer);
   enum OptimizerType { Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm, EGO };
   enum OptimizerMode { Maximize, Minimize };
-  enum ConstraintType { BHP, Rate, SplinePoints,
+
+  // -------------------------------------------------------
+  enum ConstraintType {  BHP, Rate, SplinePoints,
     WellSplineLength, WellSplineInterwellDistance, WellSplineDomain,
     CombinedWellSplineLengthInterwellDistance,
     CombinedWellSplineLengthInterwellDistanceReservoirBoundary,
     ReservoirBoundary, PseudoContBoundary2D
   };
   enum ConstraintWellSplinePointsType { MaxMin, Function};
-  enum ObjectiveType { WeightedSum };
+  enum ObjectiveType { WeightedSum, NPV };
 
   struct Parameters {
     // GSS parameters
