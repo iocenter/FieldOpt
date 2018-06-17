@@ -8,7 +8,6 @@ project(FieldOpt)
 # default modules that come with CMake.
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 include(GetSysInfo.cmake)
-
 # Compile options ======================================================
 set(CMAKE_CXX_STANDARD 11)
 
@@ -23,7 +22,6 @@ message(STATUS "CMAKE_PREFIX_PATH:" ${CMAKE_PREFIX_PATH})
 
 # Add local third party include dirs
 include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
-
 
 
 # Enable unit tests + example dir ======================================
@@ -46,7 +44,7 @@ option(BUILD_WIC_ADGPRS "Build WIC as ADGPRS plugin"    OFF)
 option(BUILD_BENCHMARK "Build exec for wic RMS benchmark" OFF)
 
 # Include Eigen + RpolyPlusPlus ========================================
-
+set(CMAKE_IGNORE_PATH "/usr/local/lib/x86_64-linux-gnu")
 find_package(Eigen3)
 if(NOT EIGEN3_FOUND)
     message(STATUS "Using local Eigen3")
