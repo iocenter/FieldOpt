@@ -1,5 +1,5 @@
 /******************************************************************************
-   Copyright (C) 2015-2016 Einar J.M. Baumann <einar.baumann@gmail.com>
+   Copyright (C) 2015-2018 Einar J.M. Baumann <einar.baumann@gmail.com>
 
    This file is part of the FieldOpt project.
 
@@ -17,23 +17,26 @@
    along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#include "grid.h"
+#include "icd.h"
 
-namespace Reservoir {
-namespace Grid {
+namespace Model {
+namespace Wells {
+namespace Wellbore {
+namespace Completions {
 
-Grid::Grid(Grid::GridSourceType type, std::string file_path)
-{
-    type_ = type;
-    file_path_ = file_path;
+ICD::ICD(const Settings::Model::Well::Completion &completion_settings,
+         Properties::VariablePropertyContainer *variable_container) : SegmentedCompletion(completion_settings,
+                                                                                          variable_container) {
+    valve_size_ = new Properties::ContinousProperty(completion_settings.valve_size);
+    valve_size_->setName(completion_settings.name);
+
+    if (completion_settings.variable_strength == true) {
+        variable_container->AddVariable(valve_size_);
+    }
+
 }
 
-Grid::~Grid()
-{
 }
-std::string Grid::GetGridFilePath() const {
-    return file_path_;
 }
-
 }
 }

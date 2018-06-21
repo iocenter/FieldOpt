@@ -75,14 +75,14 @@ class Property
    * Info datastructure is set.
    */
   enum PropertyType : int {BHP=2001, Rate=2002, SplinePoint=2003, WellBlock=2004,
-    Transmissibility=2005, PseudoContVert=2006
+    Transmissibility=2005, PseudoContVert=2006, Packer=2007, ICD=2008
   };
 
   /*!
    * \brief For SplinePoint type properties, this is used to indicate whether the property
    * is for the heel or the toe of the well.
    */
-  enum SplineEnd : int {Heel=3001, Toe=3002};
+  enum SplineEnd : int {Heel=3001, Toe=3002, Middle=3003};
 
   /*!
    * \brief For SplinePoint and WellBlock type variables, this indicates which coordinate

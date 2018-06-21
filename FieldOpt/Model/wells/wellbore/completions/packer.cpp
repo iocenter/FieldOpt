@@ -1,5 +1,5 @@
 /******************************************************************************
-   Copyright (C) 2015-2016 Einar J.M. Baumann <einar.baumann@gmail.com>
+   Copyright (C) 2015-2018 Einar J.M. Baumann <einar.baumann@gmail.com>
 
    This file is part of the FieldOpt project.
 
@@ -17,23 +17,24 @@
    along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#include "grid.h"
+#include "packer.h"
 
-namespace Reservoir {
-namespace Grid {
+namespace Model {
+namespace Wells {
+namespace Wellbore {
+namespace Completions {
 
-Grid::Grid(Grid::GridSourceType type, std::string file_path)
-{
-    type_ = type;
-    file_path_ = file_path;
+Packer::Packer(const Settings::Model::Well::Completion &completion_settings,
+               Properties::VariablePropertyContainer *variable_container) : SegmentedCompletion(completion_settings,
+                                                                                                variable_container) {
+    if (completion_settings.variable_placement == true) {
+        md_->setName(completion_settings.name);
+        variable_container->AddVariable(md_);
+    }
+
 }
 
-Grid::~Grid()
-{
 }
-std::string Grid::GetGridFilePath() const {
-    return file_path_;
 }
-
 }
 }
