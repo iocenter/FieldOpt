@@ -35,7 +35,9 @@ bool compare(const int &lhs, const int &rhs, const double *distances) {
 TrustRegionModel::TrustRegionModel() {
 }
 
-TrustRegionModel::TrustRegionModel(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& initial_points, const Eigen::VectorXd& initial_fvalues, Settings::Optimizer *settings) {
+TrustRegionModel::TrustRegionModel(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& initial_points,
+                                   const Eigen::VectorXd& initial_fvalues,
+                                   Settings::Optimizer *settings) {
     settings_ = settings;
 
     points_abs_.setZero(initial_points.rows(), initial_points.cols());

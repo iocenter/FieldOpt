@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#-----------------------------------------------------------------------
+# --------------------------------------------------------------------
 # Run one of the example drivers in for this simulation deck. 
 #
 # Note: This must be executed from the directory it's in.
@@ -18,11 +18,10 @@
 #   FIELDOPT_BIN - Path to the compiled FieldOpt executable.
 #   FIELDOPT_OUT - Path to the output directory to use.
 
+# --------------------------------------------------------------------
 clear 
-# ====================================================
 printf '=%.0s' {1..100}; printf '\n' " "
 
-# ----------------------------------------------------
 declare -a CASES=(
 	# orig jsons: 1-5
     "fo_driver.controls.cs"              # 1 
@@ -44,13 +43,13 @@ declare -a CASES=(
     "fo_driver.wplc.const-2w.AAA.wsum.cs.sln.dbg" # 15
 )
 
-# ----------------------------------------------------
+# --------------------------------------------------------------------
 for (( i=1; i<${#CASES[@]}+1; i++ ))
 do
 printf 'Case %02.0f: %s\n' ${i} "${CASES[i-1]}"
 done
 
-# ----------------------------------------------------
+# --------------------------------------------------------------------
 FODIRTLS="${HOME}/projects/PetroleumCyberneticsGroup/FieldOpt-Research"
 FODIRMB="${HOME}/git/IOC/FieldOpt-Research"
 FODIR=${FODIRMB}
@@ -60,12 +59,13 @@ FIELDOPT_BIN=${FODIR}/FieldOpt/cmake-build-debug/bin/FieldOpt
 FIELDOPT_OUT=${FODIR}/fieldopt-output
 # FIELDOPT_OUT=/home/bellout/git/IOC/FieldOpt-Research/examples/ECLIPSE/fieldopt-output
 
-# ====================================================
+# --------------------------------------------------------------------
 printf '=%.0s' {1..100}; printf '\n' " "
 
 # Set case and path variables
 CASE_IDX=$(expr $1 - 1)
 CASE=${CASES[$CASE_IDX]}
+
 CURRENT_DIR=$(pwd)
 DRIVER_PATH=${CURRENT_DIR}/${CASE}.json
 OUTPUT_DIR=${FIELDOPT_OUT}/Brugge/${CASE}
@@ -78,14 +78,14 @@ SCR_PATH=${FIELDOPT_BUILD}/execution_scripts/bash_ecl.sh
 printf '%s\n' "DBG: rm -rfv ${OUTPUT_DIR}:" 
 rm -rfv ${OUTPUT_DIR}
 
-# ====================================================
+# --------------------------------------------------------------------
 printf '=%.0s' {1..100}; printf '\n' " "
 
 # Re-create ouput subdirectory
 printf '%s\n' "DBG: mkdir -v ${OUTPUT_DIR}:" 
 mkdir -v ${OUTPUT_DIR}
 
-# ====================================================
+# --------------------------------------------------------------------
 printf '=%.0s' {1..100}; printf '\n%s\n' "Paths:"
 
 # Print paths
@@ -94,7 +94,7 @@ printf '%s\n' "Driver: ${DRIVER_PATH}"
 printf '%s\n' "Deck:   ${DECK_PATH}"
 printf '%s\n' "Grid:   ${GRID_PATH}"
 
-# ====================================================
+# --------------------------------------------------------------------
 printf '=%.0s' {1..100}; printf '\n' " "
 
 # Set LD_LIBRARY_PATH
