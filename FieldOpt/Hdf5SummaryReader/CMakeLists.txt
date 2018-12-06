@@ -15,7 +15,7 @@ target_link_libraries(hdf5summaryreader
 
 add_compile_options(-std=c++11)
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND TEST_SMRYR)
     # Unit tests
     include_directories(${HDF5_INCLUDE_DIRS})
     add_executable(test_hdf5summaryreader

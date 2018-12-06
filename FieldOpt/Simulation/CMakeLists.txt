@@ -36,7 +36,7 @@ target_link_libraries(simulation
 
 add_compile_options(-std=c++11)
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND TEST_SMLTN)
     # Unit tests
     add_executable(test_simulation
             tests/results/test_adgprsresults.cpp

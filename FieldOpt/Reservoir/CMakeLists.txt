@@ -25,7 +25,7 @@ if (BUILD_WIC_ADGPRS)
             PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND TEST_RSRVR)
     # Unit tests
     include_directories(${GTEST_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} tests)
     add_executable(test_reservoir

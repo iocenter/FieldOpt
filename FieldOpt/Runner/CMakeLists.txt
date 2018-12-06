@@ -84,7 +84,7 @@ target_include_directories(runner PUBLIC
 
 add_compile_options(-std=c++11)
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND TEST_RUNNR)
 	# Unit tests
 	add_executable(test_runner
 			tests/test_bookkeeper.cpp

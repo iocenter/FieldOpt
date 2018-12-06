@@ -26,7 +26,8 @@ target_include_directories(settings PUBLIC
 
 add_compile_options(-std=c++11)
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND TEST_STTNG)
+    include_directories(/usr/lib/x86_64-linux-gnu/)
     # Unit tests
     add_executable(test_settings
             tests/test_settings.cpp
@@ -36,13 +37,15 @@ if (BUILD_TESTING)
             tests/test_deck_parser.cpp
             tests/test_schedule_import.cpp
             tests/test_multisegment_compartmentalization.cpp
-            tests/test_trajectory_importer.cpp)
+            tests/test_trajectory_importer.cpp
+            )
     target_link_libraries(test_settings
             fieldopt::settings
             ${Boost_LIBRARIES}
             ${gtest}
             ${gtest_main}
-            ${CMAKE_THREAD_LIBS_INIT})
+            ${CMAKE_THREAD_LIBS_INIT}
+            )
 
     add_test(NAME test_settings COMMAND $<TARGET_FILE:test_settings>)
 endif()

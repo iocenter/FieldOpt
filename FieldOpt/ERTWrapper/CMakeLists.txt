@@ -30,7 +30,7 @@ if (BUILD_WIC_ADGPRS)
 endif()
 
 # Unit tests
-if (BUILD_TESTING)
+if (BUILD_TESTING AND TEST_ERTWR)
     add_executable(test_ertwrapper
             tests/test_eclgridreader.cpp
             tests/test_eclsummaryreader.cpp

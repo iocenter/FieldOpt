@@ -5,7 +5,7 @@ project(utilities)
 include_directories(utilities PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND TEST_UTILS)
     # Unit tests
     add_executable(test_utilities
             tests/test_filehandling.cpp

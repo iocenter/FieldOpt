@@ -100,6 +100,17 @@ include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
 
 # Enable unit tests + example dir ==========================
 option(BUILD_TESTING "Build unit tests"                 ON)
+option(TEST_CMATH  ""   OFF)
+option(TEST_ERTWR  ""   OFF)
+option(TEST_MODEL  ""   OFF)
+option(TEST_OPTMZ  ""   ON)
+option(TEST_RSRVR  ""   OFF)
+option(TEST_STTNG  ""   OFF)
+option(TEST_RUNNR  ""   OFF)
+option(TEST_SMLTN  ""   OFF)
+option(TEST_UTILS  ""   OFF)
+option(TEST_WICCL  ""   OFF)
+
 option(COPY_EXAMPLES "Copy examples to build directory" ON)
 
 if (BUILD_TESTING AND NOT COPY_EXAMPLES)
@@ -137,15 +148,17 @@ option(BUILD_BENCHMARK "Build exec for wic RMS benchmark" OFF)
 
 # Include Eigen: Options ===================================
 if(NOT COMPILATION_AT_MAUR)
-  find_package(Eigen3 REQUIRED)
-  include_directories(${EIGEN3_INCLUDE_DIR})
-  message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
+#  find_package(Eigen3 REQUIRED)
+#  include_directories(${EIGEN3_INCLUDE_DIR})
+#  message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
 endif()
 
 if(NOT EIGEN3_FOUND)
   message(STATUS "Using local Eigen3")
   set(EIGEN3_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
 #  set(Eigen3_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
+  message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
+  include_directories(${EIGEN3_INCLUDE_DIR})
 endif()
 
 # ----------------------------------------------------------

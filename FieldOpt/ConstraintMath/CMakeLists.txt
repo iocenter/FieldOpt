@@ -20,7 +20,7 @@ target_include_directories(constraintmath PUBLIC
 
 add_compile_options(-std=c++11)
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND TEST_CMATH)
     # Unit tests
     include_directories(${EIGEN3_INCLUDE_DIR})
     add_executable(test_constraintmath

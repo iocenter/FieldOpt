@@ -50,7 +50,7 @@ target_include_directories(model PUBLIC
 
 add_compile_options(-std=c++11)
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND TEST_MODEL)
     # Unit tests
     add_executable(test_model
             tests/test_model.cpp
@@ -65,14 +65,17 @@ if (BUILD_TESTING)
             tests/test_resource_model.h
 			tests/wells/test_pseudo_cont_vert.cpp
 			tests/wells/test_block_to_spline_conversion.cpp
-			tests/wells/test_segmented_well.cpp tests/wells/test_trajectory_curve.cpp)
-    target_link_libraries(test_model
+			tests/wells/test_segmented_well.cpp tests/wells/test_trajectory_curve.cpp
+			)
+
+	target_link_libraries(test_model
             fieldopt::model
             fieldopt::reservoir
             fieldopt::optimization
             ${gtest}
 			${gtest_main}
-            ${CMAKE_THREAD_LIBS_INIT})
+            ${CMAKE_THREAD_LIBS_INIT}
+			)
 
     add_test(NAME test_model COMMAND $<TARGET_FILE:test_model>)
 endif()

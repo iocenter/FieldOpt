@@ -76,9 +76,8 @@ install(TARGETS wellindexcalculator
 
 endif()
 
-
 # Testing ==============================================================
-if (BUILD_TESTING AND NOT BUILD_WIC_ADGPRS AND NOT USE_SANITIZING)
+if (BUILD_TESTING AND NOT BUILD_WIC_ADGPRS AND NOT USE_SANITIZING AND TEST_WICCL)
 
   # Unit tests
 #  find_package(GTest REQUIRED)

@@ -58,7 +58,7 @@ target_include_directories(optimization PUBLIC
 
 add_compile_options(-std=c++11)
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND TEST_OPTMZ)
 	# Unit tests
 	add_executable(test_optimization
 			tests/test_case.cpp
@@ -80,20 +80,22 @@ if (BUILD_TESTING)
 			tests/optimizers/test_ego.cpp
             tests/constraints/test_pseudo_cont_boundary_2d.cpp
 			tests/optimizers/test_tr-dfo.cpp
-			tests/optimizers/test_tr-model-data.hpp)
-
+			tests/optimizers/test_tr-model-data.hpp
+			)
 
 	target_link_libraries(test_optimization
 			fieldopt::optimization
 			${gtest}
 			${gtest_main}
-			${CMAKE_THREAD_LIBS_INIT})
+			${CMAKE_THREAD_LIBS_INIT}
+			)
 
 	target_include_directories(test_optimization PUBLIC
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tests>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
-			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>)
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>
+			)
 
 	add_test(NAME test_optimization COMMAND $<TARGET_FILE:test_optimization>)
 endif()
