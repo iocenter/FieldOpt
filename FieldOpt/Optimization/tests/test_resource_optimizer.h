@@ -28,20 +28,22 @@
 
 namespace TestResources {
 class TestResourceOptimizer : public TestResourceModel, public TestResourceCases {
+
  protected:
   TestResourceOptimizer() {
-      base_case_ = new Optimization::Case(model_->variables()->GetBinaryVariableValues(),
-                                          model_->variables()->GetDiscreteVariableValues(),
-                                          model_->variables()->GetContinousVariableValues());
-      base_case_->set_objective_function_value(1000.0);
+    base_case_ = new Optimization::Case(model_->variables()->GetBinaryVariableValues(),
+                                        model_->variables()->GetDiscreteVariableValues(),
+                                        model_->variables()->GetContinousVariableValues());
+    base_case_->set_objective_function_value(1000.0);
 
-      settings_compass_search_min_unconstr_ = new Settings::Optimizer(get_json_settings_compass_search_minimize_);
-      settings_compass_search_max_unconstr_ = new Settings::Optimizer(get_json_settings_compass_search_maximize_);
-      settings_apps_min_unconstr_ = new Settings::Optimizer(get_json_settings_apps_minimize_);
-      settings_apps_max_unconstr_ = new Settings::Optimizer(get_json_settings_apps_maximize_);
-      settings_ga_min_ = new Settings::Optimizer(get_json_settings_ga_minimize_);
-      settings_ga_max_ = new Settings::Optimizer(get_json_settings_ga_maximize_);
-      settings_ego_max_ = new Settings::Optimizer(get_json_settings_ego_maximize_);
+    settings_compass_search_min_unconstr_ = new Settings::Optimizer(get_json_settings_compass_search_minimize_);
+    settings_compass_search_max_unconstr_ = new Settings::Optimizer(get_json_settings_compass_search_maximize_);
+    settings_apps_min_unconstr_ = new Settings::Optimizer(get_json_settings_apps_minimize_);
+    settings_apps_max_unconstr_ = new Settings::Optimizer(get_json_settings_apps_maximize_);
+    settings_ga_min_ = new Settings::Optimizer(get_json_settings_ga_minimize_);
+    settings_ga_max_ = new Settings::Optimizer(get_json_settings_ga_maximize_);
+    settings_ego_max_ = new Settings::Optimizer(get_json_settings_ego_maximize_);
+    settings_tr_opt_max_ = new Settings::Optimizer(get_json_settings_tr_opt_maximize_);
   }
 
   Optimization::Case *base_case_;
@@ -52,9 +54,10 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
   Settings::Optimizer *settings_ga_min_;
   Settings::Optimizer *settings_ga_max_;
   Settings::Optimizer *settings_ego_max_;
+  Settings::Optimizer *settings_tr_opt_max_;
 
  private:
-  QJsonObject obj_fun_ {
+  QJsonObject obj_fun_{
       {"Type", "WeightedSum"},
       {"WeightedSumComponents", QJsonArray{
           QJsonObject{
@@ -65,7 +68,8 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
           }
       }}
   };
-  QJsonObject get_json_settings_compass_search_minimize_ {
+
+  QJsonObject get_json_settings_compass_search_minimize_{
       {"Type", "Compass"},
       {"Mode", "Minimize"},
       {"Parameters", QJsonObject{
@@ -76,7 +80,7 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
       {"Objective", obj_fun_}
   };
 
-  QJsonObject get_json_settings_compass_search_maximize_ {
+  QJsonObject get_json_settings_compass_search_maximize_{
       {"Type", "Compass"},
       {"Mode", "Maximize"},
       {"Parameters", QJsonObject{
@@ -87,7 +91,7 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
       {"Objective", obj_fun_}
   };
 
-  QJsonObject get_json_settings_apps_minimize_ {
+  QJsonObject get_json_settings_apps_minimize_{
       {"Type", "APPS"},
       {"Mode", "Minimize"},
       {"Parameters", QJsonObject{
@@ -98,7 +102,7 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
       {"Objective", obj_fun_}
   };
 
-  QJsonObject get_json_settings_apps_maximize_ {
+  QJsonObject get_json_settings_apps_maximize_{
       {"Type", "APPS"},
       {"Mode", "Maximize"},
       {"Parameters", QJsonObject{
@@ -109,7 +113,7 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
       {"Objective", obj_fun_}
   };
 
-  QJsonObject get_json_settings_ga_maximize_ {
+  QJsonObject get_json_settings_ga_maximize_{
       {"Type", "GeneticAlgorithm"},
       {"Mode", "Maximize"},
       {"Parameters", QJsonObject{
@@ -131,30 +135,30 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
       {"Objective", obj_fun_}
   };
 
-  QJsonObject get_json_settings_ga_minimize_ {
+  QJsonObject get_json_settings_ga_minimize_{
       {"Type", "GeneticAlgorithm"},
       {"Mode", "Minimize"},
       {"Parameters", QJsonObject{
-          {"MaxGenerations",        700},
-          {"PopulationSize",        60},
-          {"CrossoverProbability",  0.1},
-          {"DecayRate",             4.0},
-          {"MutationStrength",      0.25},
-          {"StagnationLimit",       1e-10},
-          {"LowerBound",            -10.0},
-          {"UpperBound",            10.0},
+          {"MaxGenerations", 700},
+          {"PopulationSize", 60},
+          {"CrossoverProbability", 0.1},
+          {"DecayRate", 4.0},
+          {"MutationStrength", 0.25},
+          {"StagnationLimit", 1e-10},
+          {"LowerBound", -10.0},
+          {"UpperBound", 10.0},
           {"RNGSeed", 5}
 
       }},
       {"Objective", obj_fun_}
   };
 
-  QJsonObject get_json_settings_ego_maximize_ {
+  QJsonObject get_json_settings_ego_maximize_{
       {"Type", "EGO"},
       {"Mode", "Maximize"},
       {"Parameters", QJsonObject{
           {"LowerBound", -1},
-          {"UpperBound",  1},
+          {"UpperBound", 1},
           {"MaxEvaluations", 50},
           {"RNGSeed", 25}
       }},
@@ -174,6 +178,19 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
 //      }}
   };
 
+  QJsonObject get_json_settings_tr_opt_maximize_{
+      {"Type", "TrustRegionOptimization"},
+      {"Mode", "Maximize"},
+      {"Parameters", QJsonObject{
+          {"MaxEvaluations", 3},
+          {"InitialTrustRegionRadius", 1},
+          {"TrustRegionLowerBound", -1000},
+          {"TrustRegionUpperBound", 1000},
+          {"RNGSeed", 25}
+      }},
+      {"Objective", obj_fun_},
+  };
 };
 }
+
 #endif //FIELDOPT_TEST_RESOURCE_OPTIMIZER_H

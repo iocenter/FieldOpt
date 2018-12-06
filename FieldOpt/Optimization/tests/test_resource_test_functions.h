@@ -68,6 +68,35 @@ namespace TestResources {
             return (100 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
         }
 
+        /*!
+         * @brief CG.prob1 -> f = @(x) (1 - x(1))^2
+         * Initial point: x0=[-1.2 2.0]
+         */
+        inline double tr_dfo_prob1(VectorXd xs) {
+            double arg1 = 1 - xs(0);
+            return pow(arg1,2);
+        }
+
+        /*!
+         * @brief CG.prob2 -> f = @(x) log1p(x(1)^2) + x(2)^2;
+         * Initial point: x0=[2.0 2.0]
+         */
+        inline double tr_dfo_prob2(VectorXd xs) {
+            double arg1 = pow(xs(0),2);
+            double arg2 = pow(xs(1),2);
+            return log1p(arg1) + arg2;
+        }
+
+        /*!
+         * @brief CG.prob3 -> f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16);
+         * Initial point: x0=[0.0 0.0]
+         */
+        inline double tr_dfo_prob3(VectorXd xs) {
+            double arg1 = M_PI * xs(0)/12;
+            double arg2 = M_PI * xs(1)/16;
+            return sin(arg1) + cos(arg2);
+        }
+
     }
 }
 

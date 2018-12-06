@@ -10,4 +10,5 @@ echo "Data file path: " $2
 cd $1
 
 # Execute eclipse with the file path as parameter
-exec /ecl/2016.2/bin/linux_x86_64/eclipse.exe $2 >/dev/null
+exec /opt/ecl/macros/@eclipse $2 >/dev/null
+# exec /ecl/2016.2/bin/linux_x86_64/eclipse.exe $2 >/dev/null

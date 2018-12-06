@@ -26,6 +26,7 @@
 #include <Optimization/optimizers/RGARDD.h>
 #include <Optimization/hybrid_optimizer.h>
 #include <Optimization/optimizers/bayesian_optimization/EGO.h>
+#include <Optimization/optimizers/trust_region/TrustRegionOptimization.h>
 #include <Simulation/simulator_interfaces/ix_simulator.h>
 #include "abstract_runner.h"
 #include "Optimization/optimizers/compass_search.h"
@@ -232,6 +233,16 @@ void AbstractRunner::InitializeOptimizer()
         case Settings::Optimizer::OptimizerType::Hybrid:
             if (VERB_RUN >= 1) Printer::ext_info("Using Hybrid optimization algorithm.", "Runner", "AbstractRunner");
             optimizer_ = new Optimization::HybridOptimizer(settings_->optimizer(),
+                                                           base_case_,
+                                                           model_->variables(),
+                                                           model_->grid(),
+                                                           logger_
+            );
+            optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
+            break;
+        case Settings::Optimizer::OptimizerType::TrustRegionOptimization:
+            if (VERB_RUN >= 1) Printer::ext_info("Using Trust Region optimization algorithm.", "Runner", "AbstractRunner");
+            optimizer_ = new Optimization::Optimizers::TrustRegionOptimization(settings_->optimizer(),
                                                            base_case_,
                                                            model_->variables(),
                                                            model_->grid(),

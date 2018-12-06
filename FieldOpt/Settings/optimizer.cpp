@@ -367,6 +367,41 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
             }
         }
 
+        // Trust Region parameters
+        if (json_parameters.contains("InitialTrustRegionRadius")) {
+            if (json_parameters["InitialTrustRegionRadius"].toDouble() >= 0.0) {
+                params.tr_initial_radius = json_parameters["InitialTrustRegionRadius"].toDouble();
+            }
+            else {
+                throw std::runtime_error("Invalid value for setting InitialTrustRegionRadius");
+            }
+        }
+
+        if (json_parameters.contains("TrustRegionLowerBound")) {
+            if (json_parameters.contains("TrustRegionUpperBound")) {
+                if (json_parameters["TrustRegionLowerBound"].toDouble() <
+                    json_parameters["TrustRegionUpperBound"].toDouble()) {
+                    params.tr_lower_bound = json_parameters["TrustRegionLowerBound"].toDouble();
+                } else {
+                    throw std::runtime_error("Invalid value for setting TrustRegionLowerBound");
+                }
+            } else {
+                params.tr_lower_bound = json_parameters["TrustRegionLowerBound"].toDouble();
+            }
+        }
+
+        if (json_parameters.contains("TrustRegionUpperBound")) {
+            if (json_parameters.contains("TrustRegionLowerBound")) {
+                if (json_parameters["TrustRegionLowerBound"].toDouble() <
+                    json_parameters["TrustRegionUpperBound"].toDouble()) {
+                    params.tr_upper_bound = json_parameters["TrustRegionUpperBound"].toDouble();
+                } else {
+                    throw std::runtime_error("Invalid value for setting TrustRegionUpperBound");
+                }
+            } else {
+                params.tr_upper_bound = json_parameters["TrustRegionUpperBound"].toDouble();
+            }
+        }
 
         // RNG seed
         if (json_parameters.contains("RNGSeed")) {
@@ -516,6 +551,8 @@ Optimizer::OptimizerType Optimizer::parseType(QString &type) {
         opt_type = OptimizerType::ExhaustiveSearch2DVert;
     else if (QString::compare(type, "Hybrid") == 0)
         opt_type = OptimizerType::Hybrid;
+    else if (QString::compare(type, "TrustRegionOptimization") == 0)
+        opt_type = OptimizerType::TrustRegionOptimization;
     else throw OptimizerTypeNotRecognizedException("The optimizer type " + type.toStdString() + " was not recognized.");
     return opt_type;
 }

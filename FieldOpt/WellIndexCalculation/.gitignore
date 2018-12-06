@@ -1,3 +1,4 @@
 *.cmake
 *.cbp
 /Makefile
+/CMakeFiles

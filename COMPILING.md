@@ -20,8 +20,16 @@ cmake .
 make
 make install
 
+# Compile opm-common
+cd FieldOpt/ThirdParty/opm-common
+mkdir cmake-build-debug
+cd cmake-build-debug
+cmake ..
+make 
+make install
+
 # Compile FieldOpt
-cd ..
+cd ../../..
 mkdir cmake-build-debug
 cd cmake-build-debug
 cmake ..
