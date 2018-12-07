@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --------------------------------------------------------------------
-# Run one of the example drivers in for this simulation deck. 
+# Run one of the example drivers in for this simulation deck.
 #
 # Note: This must be executed from the directory it's in.
 #
@@ -19,17 +19,17 @@
 #   FIELDOPT_OUT - Path to the output directory to use.
 
 # --------------------------------------------------------------------
-clear 
+clear
 printf '=%.0s' {1..100}; printf '\n' " "
 
 declare -a CASES=(
 	# orig jsons: 1-5
-    "fo_driver.controls.cs"              # 1 
-    "fo_driver.curved_wells.controls.cs" # 2 
+    "fo_driver.controls.cs"              # 1
+    "fo_driver.curved_wells.controls.cs" # 2
     "fo_driver.control.npv.apps"         # 3
-    "fo_driver.control.npv.cs"           # 4 
-    "fo_driver.control.rate.npv.apps"    # 5 
-    "fo_driver.compartments.npv.apps"    # 6 
+    "fo_driver.control.npv.cs"           # 4
+    "fo_driver.control.rate.npv.apps"    # 5
+    "fo_driver.compartments.npv.apps"    # 6
     # dbg jsons:
     "fo_driver.controls.cs.dbg"              #  7 [SER=OK] [MPI=OK]
     "fo_driver.curved_wells.controls.cs.dbg" #  8 [SER=OK] [MPI=OK]
@@ -37,7 +37,7 @@ declare -a CASES=(
     "fo_driver.control.npv.cs.dbg"           # 10 [SER=OK] [MPI=OK]
     "fo_driver.control.rate.npv.apps.dbg"    # 11 [SER=OK] [MPI=OK]
     "fo_driver.compartments.npv.apps.dbg"    # 12 [SER=OK] [MPI=OK]
-    # 
+    #
     "fo_driver.wplc.const-2w.AAA.wsum.cs.aaa.dbg" # 13 no.const
     "fo_driver.wplc.const-2w.AAA.wsum.cs.bbb.dbg" # 14 simple.const
     "fo_driver.wplc.const-2w.AAA.wsum.cs.sln.dbg" # 15
@@ -75,14 +75,14 @@ SCR_PATH=${FIELDOPT_BUILD}/execution_scripts/bash_ecl.sh
 #SCR_PATH=${FIELDOPT_BUILD}/execution_scripts/bash_flow.sh
 
 # Delete ouput subdirectory
-printf '%s\n' "DBG: rm -rfv ${OUTPUT_DIR}:" 
+printf '%s\n' "DBG: rm -rfv ${OUTPUT_DIR}:"
 rm -rfv ${OUTPUT_DIR}
 
 # --------------------------------------------------------------------
 printf '=%.0s' {1..100}; printf '\n' " "
 
 # Re-create ouput subdirectory
-printf '%s\n' "DBG: mkdir -v ${OUTPUT_DIR}:" 
+printf '%s\n' "DBG: mkdir -v ${OUTPUT_DIR}:"
 mkdir -v ${OUTPUT_DIR}
 
 # --------------------------------------------------------------------
@@ -106,7 +106,7 @@ export ${LDPATH}
 CMDMPI="mpirun -np 3 -mca btl ^openib ${FIELDOPT_BIN} "\
 "${DRIVER_PATH} ${OUTPUT_DIR} -r mpisync -n1 -m3 "\
 "-g ${GRID_PATH} -s ${DECK_PATH} "\
-"-e ${SCR_PATH} -f -v 3 -t 0" 
+"-e ${SCR_PATH} -f -v 3 -t 0"
 
 printf '%s\n' "CMDMPI=${CMDMPI}"
 

@@ -7,9 +7,9 @@
         "Type": "Compass",
         "Mode": "Maximize",
         "Parameters": {
-            "MaxEvaluations": 100000,
-            "InitialStepLength": 384.0,
-            "MinimumStepLength": 4.0,
+            "MaxEvaluations": 1,
+            "InitialStepLength": 96.0,
+            "MinimumStepLength": 96.0,
             "InitialStepLengthVector": [
                 192.0, 192.0, 192.0, 192.0, 192.0, 192.0,
                 192.0, 192.0, 192.0, 192.0, 192.0, 192.0
@@ -55,7 +55,7 @@
     },
     "Model": {
         "ControlTimes": [
-            0, 73, 146 ],
+            0, 1, 2 ],
         "Reservoir": {
             "Type": "ECLIPSE"
         },
@@ -80,7 +80,7 @@
                       "x": 8.0008868689699020e+03,
                       "y": 1.4236445931830762e+04,
                       "z": 1.5419891052246094e+03,
-                      "IsVariable": true
+                      "IsVariable": false
                   }
                 },
                 "Controls": [
@@ -91,13 +91,13 @@
                         "BHP": 70.0
                     },
                     {
-                        "TimeStep":   73,
+                        "TimeStep":   1,
                         "State": "Open",
                         "Mode": "BHP",
                         "BHP": 70.0
                     },
                     {
-                        "TimeStep":  146,
+                        "TimeStep":  2,
                         "State": "Open",
                         "Mode": "BHP",
                         "BHP": 70.0
@@ -118,13 +118,13 @@
                       "x": 6.7142643083460989e+03,
                       "y": 1.3995174370701869e+04,
                       "z": 1.5391975860595703e+03,
-                      "IsVariable": true
+                      "IsVariable": false
                   },
                   "Toe": {
                       "x": 6.8449517118781223e+03,
                       "y": 1.3984560720547524e+04,
                       "z": 1.5454182891845703e+03,
-                      "IsVariable": true
+                      "IsVariable": false
                   }
                 },
                 "Controls": [
@@ -135,13 +135,13 @@
                         "BHP": 70.0
                     },
                     {
-                        "TimeStep":   73,
+                        "TimeStep":   1,
                         "State": "Open",
                         "Mode": "BHP",
                         "BHP": 70.0
                     },
                     {
-                        "TimeStep":  146,
+                        "TimeStep":  2,
                         "State": "Open",
                         "Mode": "BHP",
                         "BHP": 70.0
@@ -245,14 +245,14 @@
                         "BHP": 170.0
                     },
                     {
-                        "TimeStep":   73,
+                        "TimeStep":   1,
                         "State": "Open",
                         "Type": "Water",
                         "Mode": "BHP",
                         "BHP": 170.0
                     },
                     {
-                        "TimeStep":  146,
+                        "TimeStep":  2,
                         "State": "Open",
                         "Type": "Water",
                         "Mode": "BHP",
@@ -379,14 +379,14 @@
                         "BHP": 170.0
                     },
                     {
-                        "TimeStep":   73,
+                        "TimeStep":   1,
                         "State": "Open",
                         "Type": "Water",
                         "Mode": "BHP",
                         "BHP": 170.0
                     },
                     {
-                        "TimeStep":  146,
+                        "TimeStep":  2,
                         "State": "Open",
                         "Type": "Water",
                         "Mode": "BHP",
