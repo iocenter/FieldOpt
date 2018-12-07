@@ -112,6 +112,8 @@ class AbstractRunner
   void FinalizeInitialization(bool write_logs); //!< Write the pre-run summary
   void FinalizeRun(bool write_logs); //!< Finalize the run, writing data to the summary log.
 
+  void InitMultiplePoints();
+
   /*!
    * @brief Initialize the logger.
    * @param output_subdir Optional subdir in the output dir to write the logs in.

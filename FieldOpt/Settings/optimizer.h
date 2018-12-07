@@ -144,6 +144,10 @@ class Optimizer
     int hybrid_max_iterations = 2;
   };
 
+  struct InitPoints {
+
+  };
+
   struct Objective {
     ObjectiveType type; //!< The objective definition type (e.g. WeightedSum, NPV)
     bool use_penalty_function; //!< Whether or not to use penalty function (default: false).

@@ -174,22 +174,26 @@ void AbstractRunner::InitializeBaseCase()
     if (VERB_RUN >= 1) Printer::ext_info("Base case objective function value set to " + Printer::num2str(base_case_->objective_function_value()), "Runner", "AbstractRunner");
 }
 
-//void AbstractRunner::InitMultipleCases() {
-//
-//    if (base_case_ == 0) {
-//        throw std::runtime_error(
-//                "Base Case must be initialized.");
-//    }
-//
-//    auto opt_settings = settings_->optimizer();
+void AbstractRunner::InitMultiplePoints() {
+
+    if (base_case_ == 0) {
+        throw std::runtime_error(
+                "Base Case must be initialized.");
+    }
+
+    auto opt_settings = settings_->optimizer();
+    // Get # of points
 //    for (int ii=0; ii < ncases; ii++) {
 //
+////        binary_var_values
+////        discrete_var_values
+////        continuous_var_values
+//
+//        base_case_ = new Optimization::Case();
+//
 //    }
-//
-//
-//
-//}
 
+}
 
 void AbstractRunner::InitializeOptimizer()
 {
