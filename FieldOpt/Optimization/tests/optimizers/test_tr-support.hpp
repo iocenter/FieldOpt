@@ -57,23 +57,41 @@ namespace TestResources {
     vector<double> v2{ std::begin(vbl), std::end(vbl) }; // <- v2: std
     Eigen::VectorXd vb = Eigen::Map<VectorXd>(v2.data(), v2.size()); // <- vb: VectorXd
 
+    // --------------
     // Eigen approach
     double tol = 1e-6;
-    VectorXi idxa(va.rows(),1);
+    VectorXi idxa(vb.rows(),1);
+    // cout << "va: " << va.transpose() << endl;
+    // cout << "vb: " << vb.transpose() << endl << endl;
 
-    for (int ii=0; ii<va.size(); ii++) {
-      for (int jj=0; jj<vb.size(); jj++) {
-        if ( norm( va(ii) - vb(jj) ) < tol ) {
+    for (int ii=0; ii<vb.size(); ii++) {
+
+      // cout << "ii: " << ii << endl << endl;
+
+      for (int jj=0; jj<va.size(); jj++) {
+
+        // cout << "jj: " << jj << endl;
+        // cout << "va(jj=" << jj << ") : " << va(jj) << endl;
+        // cout << "vb(ii=" << ii << ") : " << vb(ii) << endl;
+
+        if ( norm( va(jj) - vb(ii) ) < tol ) {
           idxa.row(ii) << jj;
-        } else {
-          continue;
+          va(jj) = std::numeric_limits<double>::lowest();
+
+          // cout << "----" << endl << "va: " << va.transpose() << endl;
+          // cout << "idxa: [ " << idxa.transpose() << " ]" << endl << endl;
+          break;
+
         }
+
       }
     }
-    // cout << "ia:" << endl << ia << endl; // dbg
+    // dbg
+    // cout << "idxa-end: [ " << idxa.transpose() << " ]" << endl;
 
+    // -----------
     // std approah
-    // vector<int> idx1; // <- defined as function param
+    vector<int> idx1;
 
     for (int ii=0; ii<v2.size(); ii++) {
 
@@ -82,12 +100,21 @@ namespace TestResources {
             return norm( x - v2[ii] ) < tol;
           } );
 
-      prob.idx.push_back( (int)distance(v1.begin(), it) );
+      idx1.push_back( (int)distance(v1.begin(), it) );
+      v1[idx1.back()] = std::numeric_limits<double>::lowest();
+
     }
+    prob.idx = idx1; // <- set to function param
+
     // dbg
-    // cout << "idx:";
-    // for (int ii=0; ii<idx1.size(); ii++) { cout << idx1[ii] << " "; }
-    // cout << endl;
+   // cout << "idx1: [ ";
+   // for (int ii=0; ii<idx1.size(); ii++) { cout << idx1[ii] << " "; }
+   // cout << "]" << endl;
+
+   // --------------------
+   // Check b/e approaches
+    Eigen::VectorXi idx1e = Eigen::Map<VectorXi>(idx1.data(), idx1.size());
+    if (!idxa.isApprox(idx1e)) { throw runtime_error(""); };
 
   } // End of void FindVarSequence
 
@@ -113,6 +140,9 @@ namespace TestResources {
       xbr.row(ii) << prob.xm(prob.idx[ii],1);
     }
 
+    // dbg
+    // cout << "prob.xm: " << endl << prob.xm << endl;
+    // cout << "xbr: " << endl << xbr << endl;
     c.SetRealVarValues(xbr.col(0));
     c.set_objective_function_value(prob.fm(0,1));
   }
