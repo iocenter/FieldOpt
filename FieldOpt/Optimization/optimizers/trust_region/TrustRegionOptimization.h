@@ -48,6 +48,7 @@ class TrustRegionOptimization : public Optimizer {
                 Constraints::ConstraintHandler *constraint_handler=0
     );
     TrustRegionModel* getTrustRegionModel();
+    int GetNumInitPoints() { return n_initial_points_; };
 
  protected:
     void handleEvaluatedCase(Case *c) override;
@@ -55,7 +56,7 @@ class TrustRegionOptimization : public Optimizer {
 
  private:
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> initial_points_;
-    Eigen::VectorXd initial_fvalues_;
+    Eigen::RowVectorXd initial_fvalues_;
     VectorXd lb_, ub_; //!< Upper and lower bounds
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;

@@ -24,6 +24,7 @@
 #include <Settings/optimizer.h>
 #include <Eigen/Core>
 #include <vector>
+#include <tuple>
 
 struct Polynomial {
     int dimension = 0;
@@ -46,8 +47,17 @@ class TrustRegionModel {
    * @brief Initialize the trust region model.
    */
     TrustRegionModel();
-    TrustRegionModel(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& initial_points, const Eigen::VectorXd& initial_fvalues , Settings::Optimizer *settings);
+    TrustRegionModel(
+            const Eigen::Matrix<double,
+            Eigen::Dynamic,Eigen::Dynamic>& initial_points,
+            const Eigen::RowVectorXd& initial_fvalues ,
+            Settings::Optimizer *settings);
     int getDimension();
+    double getRadius();
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> getPoints();
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> getPointsShifted();
+    Eigen::RowVectorXd getFunctionValues();
+    std::vector<Polynomial> getPivotPolynomials();
 
     void moveToBestPoint();
     void criticalityStep();
@@ -56,7 +66,7 @@ class TrustRegionModel {
     void improveModelNfp();
     void ensureImprovement();
     bool isLambdaPoised();
-    void changeTrCenter(Eigen::VectorXd new_point, Eigen::VectorXd fvalues);
+    void changeTrCenter(Eigen::VectorXd new_point, Eigen::RowVectorXd fvalues);
     std::map<Eigen::VectorXd, Eigen::VectorXd> solveTrSubproblem();
     void computePolynomialModels();
 
@@ -65,11 +75,13 @@ class TrustRegionModel {
     Settings::Optimizer *settings_;
     std::vector<Polynomial> pivot_polynomials_;
     std::vector<Polynomial> modeling_polynomials_;
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> all_points_;
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_abs_;
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_shitfted_;
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_shifted_;
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> cached_points_;
-    Eigen::VectorXd fvalues_;
-    Eigen::VectorXd cached_fvalues_;
+    Eigen::RowVectorXd all_fvalues_;
+    Eigen::RowVectorXd fvalues_;
+    Eigen::RowVectorXd cached_fvalues_;
     Eigen::VectorXd index_vector_;
     Eigen::VectorXd distances_;
     Eigen::RowVector2d pivot_values_;
@@ -78,10 +90,116 @@ class TrustRegionModel {
     int cache_max_;
     int dim_;
 
-    void sortVectorByIndex(Eigen::VectorXd &vec, const Eigen::VectorXd &ind);
-    void sortMatrixByIndex(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &points, const Eigen::VectorXd &ind);
+    /*!
+   * @brief sort row vector for a given index ordering.
+   * @param &vec pointer to the vector.
+   * @param &ind pointer to the vector of ordered index.
+   */
+    void sortVectorByIndex(
+            Eigen::RowVectorXd &vec,
+            const Eigen::VectorXd &ind);
+
+
+    /*!
+   * @brief sort column vector for a given index ordering.
+   * @param &vec pointer to the vector.
+   * @param &ind pointer to the vector of ordered index.
+   */
+    void sortVectorByIndex(
+            Eigen::VectorXd &vec,
+            const Eigen::VectorXd &ind);
+
+    /*!
+   * @brief sort matrix of column vectors (points) for a given index ordering.
+   * @param &points pointer to the matrix of points.
+   * @param &ind pointer to the vector of ordered index.
+   */
+    void sortMatrixByIndex(
+            Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &points,
+            const Eigen::VectorXd &ind);
+
+
+     /*!
+    * @brief Build a Newton Fundamental Polynomial basis for the corresponding dimenion.
+    * @param dim polynomial basis dimension.
+    */
     void nfpBasis(int dim);
-    Polynomial matricesToPolynomial(int c0, const Eigen::VectorXd &g0, const Eigen::MatrixXd &H);
+
+    /*!
+   * @brief converts matrices c, g, and H into polynomial coefficients.
+   * @param c0 constant term.
+   * @param g0 linear terms (vector).
+   * @param H quadratic term (matrix)
+   * @return Polynomial containing the corresponding dimension and coefficients.
+   */
+    Polynomial matricesToPolynomial(
+            int c0,
+            const Eigen::VectorXd &g0,
+            const Eigen::MatrixXd &H);
+
+    /*!
+     * @brief converts polynomial coefficients to matrices c, g, H
+     * @param dimension dimension of polynomial.
+     * @param coefficients coefficients of polynomial.
+     * @return tuple<int, Eigen::VectorXd, Eigen::MatrixXd> matrices c, g, and H  respectively.
+     */
+    std::tuple<int, Eigen::VectorXd, Eigen::MatrixXd> coefficientsToMatrices(
+            int dimension,
+            Eigen::VectorXd coefficients);
+
+
+    /*!
+     * @brief orthogonalize polynomial pivot_polynomials_(poly_i) with respect to others in pivot_polynomials_.
+     * @param poly_i index of polynomial to be orthogonalized.
+     * @param last_pt index of last polynomial participating in the orthogonalization.
+     * @return resulting polynomial.
+     */
+    Polynomial orthogonalizeToOtherPolynomials(
+            int poly_i,
+            int last_pt);
+
+
+    /*!
+     * @brief subtract polynomials p1 and p2 so that the result is zero at x.
+     * @param p1 first polynomial.
+     * @param p2 second polynomial.
+     * @return resulting polynomial.
+     */
+    Polynomial zeroAtPoint(
+            Polynomial p1,
+            Polynomial p2,
+            Eigen::VectorXd x);
+
+
+    /*!
+     * @brief evaluate polynomial p1 in given point x.
+     * @param p1 the polynomial.
+     * @param x the point.
+     * @return a scalar with the evaluation result.
+     */
+    double evaluatePolynomial(
+            Polynomial p1,
+            Eigen::VectorXd x);
+
+    /*!
+     * @brief Add two polynomials.
+     * @param p1 first polynomial
+     * @param p2 second polynomial
+     * @return resulting polynomial from the summation of p1 and p2.
+     */
+    Polynomial addPolynomial(
+            Polynomial p1,
+            Polynomial p2);
+
+    /*!
+     * @brief Multiply a polynomial by a constant factor.
+     * @param p1 the polynomial.
+     * @param factor the constant factor.
+     * @return resulting polynomial p = p1.*factor.
+     */
+    Polynomial multiplyPolynomial(
+            Polynomial p1,
+            double factor);
 };
 
 }

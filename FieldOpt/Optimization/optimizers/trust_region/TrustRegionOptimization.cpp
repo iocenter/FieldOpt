@@ -200,11 +200,9 @@ void TrustRegionOptimization::projectToBounds(VectorXd *point) {
     if (ub_.size() > 0) {
         *point = ub_.cwiseMin(*point);
     }
-    cout << *point << endl;
     if (lb_.size() > 0) {
         *point = lb_.cwiseMax(*point);
     }
-    cout << *point << endl;
 }
 
 Loggable::LogTarget TrustRegionOptimization::ConfigurationSummary::GetLogTarget() {

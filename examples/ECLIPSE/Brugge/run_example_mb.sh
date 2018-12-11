@@ -110,7 +110,7 @@ CMDMPI="mpirun -np 3 -mca btl ^openib ${FIELDOPT_BIN} "\
 
 printf '%s\n' "CMDMPI=${CMDMPI}"
 
-# ====================================================
+# --------------------------------------------------------------------
 printf '=%.0s' {1..100}; printf '\n' " "
 
 # Make run command (SERIAL)
@@ -121,5 +121,6 @@ CMDSER="${FIELDOPT_BIN} "\
 
 printf '%s\n' "CMDSER=${CMDSER}"
 
+# --------------------------------------------------------------------
 # eval ${CMDSER}
 eval ${CMDMPI}
