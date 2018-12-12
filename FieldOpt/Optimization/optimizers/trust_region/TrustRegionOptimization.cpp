@@ -130,7 +130,8 @@ void TrustRegionOptimization::computeInitialPoints() {
             //!<Find (random) 2nd initial point>
             auto rng = get_random_generator(settings_->parameters().rng_seed);
 
-            VectorXd second_point = VectorXd::Zero(n_cont_vars,1);
+            VectorXd second_point(n_cont_vars, 1);
+            second_point.setZero(n_cont_vars);
             for (int i = 0; i < n_cont_vars; ++i) {
                 second_point(i) = random_double(rng, 0, 1);
             }

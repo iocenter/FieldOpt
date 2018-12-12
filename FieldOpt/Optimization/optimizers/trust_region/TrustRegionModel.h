@@ -82,13 +82,24 @@ class TrustRegionModel {
     Eigen::RowVectorXd all_fvalues_;
     Eigen::RowVectorXd fvalues_;
     Eigen::RowVectorXd cached_fvalues_;
+    Eigen::RowVectorXd pivot_values_;
     Eigen::VectorXd index_vector_;
     Eigen::VectorXd distances_;
-    Eigen::RowVector2d pivot_values_;
+
     double radius_;
     int tr_center_; //!<index of trust region center point in points_abs>
     int cache_max_;
     int dim_;
+
+   /*!
+   * @brief shift the point
+   * @param pointer to the matrix containing the points to be reordered.
+   * @param point_index point index and beginning of the block.
+   * @param end of block index.
+   */
+    void shiftPolynomialToEndBlock(
+           int point_index,
+           int block_end);
 
     /*!
    * @brief sort row vector for a given index ordering.
@@ -148,6 +159,17 @@ class TrustRegionModel {
             Eigen::VectorXd coefficients);
 
 
+
+    /*!
+     * @brief normalize polynomial with respect to a point
+     * @param poly_i index of polynomial to be normalized.
+     * @param pt_next index point in points_shifted participating in the normalization.
+     * @return resulting polynomial.
+     */
+    Polynomial normalizePolynomial(
+            int poly_i,
+            int pt_next);
+
     /*!
      * @brief orthogonalize polynomial pivot_polynomials_(poly_i) with respect to others in pivot_polynomials_.
      * @param poly_i index of polynomial to be orthogonalized.
@@ -157,6 +179,19 @@ class TrustRegionModel {
     Polynomial orthogonalizeToOtherPolynomials(
             int poly_i,
             int last_pt);
+
+    /*!
+   * @brief orthogonalize a block from pivot_polynomials_.
+   * @param point point used to orthogonalize polynomials.
+   * @param poly_i polynomial index in pivot_polynomials_.
+   * @param poly_i end of the block to be orthogonalized.
+   * @param block_beginning beginning of the block to be orthogonalized.
+   */
+    void orthogonalizeBlock(
+            Eigen::VectorXd point,
+            int poly_i,
+            int block_beginning,
+            int block_end);
 
 
     /*!
