@@ -18,13 +18,15 @@
    along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 #include "TrustRegionModel.h"
-#include <numeric>
-#include <functional>
 #include <Settings/optimizer.h>
+
 #include "Utilities/printer.hpp"
 #include "Utilities/stringhelpers.hpp"
 #include <Utilities/verbosity.h>
-#include <Eigen/Dense>
+// #include <Eigen/Dense>
+
+#include <numeric>
+#include <functional>
 
 namespace Optimization {
 namespace Optimizers {
