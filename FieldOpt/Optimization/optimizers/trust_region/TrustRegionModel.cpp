@@ -23,7 +23,7 @@
 #include "Utilities/printer.hpp"
 #include "Utilities/stringhelpers.hpp"
 #include <Utilities/verbosity.h>
-// #include <Eigen/Dense>
+#include <Eigen/Dense>
 
 #include <numeric>
 #include <functional>
@@ -54,23 +54,25 @@ TrustRegionModel::TrustRegionModel(
 
     lb_ = lb;
     ub_ = ub;
+
     settings_ = settings;
+    radius_ =  settings_->parameters().tr_initial_radius;
+    tr_center_ = 0;
+    dim_ = initial_points.rows();
+    cache_max_ = 3*pow(dim_,2);
+
     points_abs_.setZero(initial_points.rows(), initial_points.cols());
     points_abs_ << initial_points;
 
     fvalues_.setZero(initial_fvalues.size());
     fvalues_ << initial_fvalues;
 
-    radius_ =  settings_->parameters().tr_initial_radius;
-    tr_center_ = 0;
-    dim_ = initial_points.rows();
-    cache_max_ = 3*pow(dim_,2);
-
-
     pivot_values_.resize(0);
     cached_fvalues_.resize(0);
+
     index_vector_.resize(0);
     distances_.resize(0);
+
     cached_points_.resize(0,0);
     points_shifted_.resize(0,0);
 
