@@ -129,7 +129,8 @@ double TrustRegionModel::checkInterpolation() {
 bool TrustRegionModel::rebuildModel() {
     double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
 
-    all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
+    //!<All points we know>
+    all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
     if (cached_points_.size() == 0) {
         all_points_ = points_abs_;
     } else {
@@ -137,7 +138,8 @@ bool TrustRegionModel::rebuildModel() {
         all_points_ << cached_points_;
     }
 
-    all_fvalues_.resize(fvalues_.size() + cached_fvalues_.size()); //!<All function values we know>
+    //!<All function values we know>
+    all_fvalues_.resize(fvalues_.size() + cached_fvalues_.size());
 
     if (cached_fvalues_.size() == 0) {
         all_fvalues_ = fvalues_;
@@ -149,19 +151,24 @@ bool TrustRegionModel::rebuildModel() {
     int dim = all_points_.rows();
     int n_points = all_points_.cols();
     if (tr_center_ != 0) {
-        all_points_.col(0).swap(all_points_.col(tr_center_)); //!<center will be first>
+        //!<Center will be first>
+        all_points_.col(0).swap(all_points_.col(tr_center_));
         auto center_fvalue = all_points_(tr_center_);
         all_fvalues_(tr_center_) = all_fvalues_(0);
         all_fvalues_(0) = center_fvalue;
     }
-    //!<calculate distances from tr center>
+    //!<Calculate distances from tr center>
     points_shifted_.resize(dim, n_points);
     distances_.resize(n_points);
     points_shifted_.setZero(dim, n_points);
     distances_.setZero(n_points);
-    for (int i = 1; i < n_points; i++) { //!<Shift all points to TR center>
-        points_shifted_.col(i) << all_points_.col(i) - all_points_.col(0); //!<Compute distances>
-        distances_(i) = points_shifted_.col(i).lpNorm<Infinity>(); //<!distances in infinity or 2-norm>
+
+    //!<Shift all points to TR center>
+    for (int i = 1; i < n_points; i++) {
+        //!<Compute distances>
+        points_shifted_.col(i) << all_points_.col(i) - all_points_.col(0);
+        //<!distances in infinity or 2-norm>
+        distances_(i) = points_shifted_.col(i).lpNorm<Infinity>();
     }
 
     //!<Reorder points based on their distances to the tr center>
@@ -180,7 +187,7 @@ bool TrustRegionModel::rebuildModel() {
     pivot_values_.resize(polynomials_num);
     pivot_values_.setZero(polynomials_num);
 
-    //!<constant term>
+    //!<Constant term>
     int last_pt_included = 0;
     int poly_i = 1;
     pivot_values_(0) = 1;
@@ -207,7 +214,7 @@ bool TrustRegionModel::rebuildModel() {
                 break;
 
             }
-        } else {  //!<Quadratic block -- being more carefull>
+        } else { //!<Quadratic block -- being more carefull>
             max_layer = min(settings_->parameters().tr_radius_factor, distance_farthest_point);
             block_beginning = dim + 1;
             block_end = polynomials_num - 1;
@@ -241,7 +248,7 @@ bool TrustRegionModel::rebuildModel() {
         }
 
         if (abs(max_absval) > pivot_threshold) {
-            //!<points accepted>
+            //!<Points accepted>
             int pt_next = last_pt_included + 1;
             if (pt_next != pt_max) {
                 points_shifted_.col(pt_next).swap(points_shifted_.col(pt_max));
@@ -314,13 +321,13 @@ int TrustRegionModel::ensureImprovement() {
     bool success = false;
 
     if (!model_complete && (!model_old || !model_fl)) {
-        //!<calculate a new point to add>
+        //!<Calculate a new point to add>
         success = improveModelNfp(); //!<improve model>
         if (success) {
             exit_flag = 1;
         }
     } else if ((model_complete) && (!model_old)){
-        //!<replace some point with a new one that improves geometry>
+        //!<Replace some point with a new one that improves geometry>
         success = chooseAndReplacePoint(); //!<replace point>
         if (success) {
             exit_flag = 2;
@@ -382,17 +389,18 @@ std::map<VectorXd, VectorXd> TrustRegionModel::solveTrSubproblem() {
 void TrustRegionModel::computePolynomialModels() {
     int dim = points_abs_.rows();
     int points_num = points_abs_.cols();
-    int functions_num = 1; //!<this code currently supports only 1 function>
+    int functions_num = 1; //!<Code currently supports only 1 function>
     int linear_terms = dim+1;
     int full_q_terms = (dim+1)*(dim+2)/2;
     std::vector<Polynomial> polynomials(functions_num);
 
     if ((linear_terms < points_num) && (points_num < full_q_terms)) {
-        //!<compute quadratic model>
+        //!<Compute quadratic model>
         polynomials = computeQuadraticMNPolynomials();
     }
 
-    if ((points_num <= linear_terms) || (points_num == full_q_terms)) { //!<ideally we should check if the model is a badly conditioned system
+    //!<Ideally we should check if the model is a badly conditioned system
+    if ((points_num <= linear_terms) || (points_num == full_q_terms)) {
         //!<Compute model with incomplete (complete) basis>
         auto l_alpha = nfpFiniteDifferences(points_num);
         for (int k=functions_num-1; k>=0; k--) {
@@ -462,11 +470,11 @@ void TrustRegionModel::sortMatrixByIndex(
 }
 
 void TrustRegionModel::nfpBasis(int dim) {
-    //!<number of terms>
+    //!<Number of terms>
     int poly_num = (dim+1)*(dim+2)/2;
     int linear_size = dim+1;
 
-    //!<calculating basis of polynomials>
+    //!<Calculating basis of polynomials>
     pivot_polynomials_.resize(poly_num);
     pivot_polynomials_[poly_num-1].dimension = dim;
     pivot_polynomials_[poly_num-1].coefficients.resize(poly_num);
@@ -479,7 +487,7 @@ void TrustRegionModel::nfpBasis(int dim) {
         pivot_polynomials_[i].coefficients(i) = 1;
     }
 
-    //!<quadratic entries>
+    //!<Quadratic entries>
     int c0 = 0;
     int m = 0;
     int n = 0;
@@ -516,14 +524,14 @@ Polynomial TrustRegionModel::matricesToPolynomial(
     VectorXd coefficients(n_terms);
     coefficients.setZero(n_terms);
 
-    //!<zero order>
+    //!<Zero order>
     coefficients(0) = c0;
 
-    //!<first order>
+    //!<First order>
     int ind_coefficients = dim;
     coefficients.segment(1,ind_coefficients) = g0;
 
-    //!<second order>
+    //!<Second order>
     for (int k=0; k<dim; k++) {
         for (int m=0; m <= k; m++) {
             ind_coefficients = ind_coefficients + 1;
@@ -555,14 +563,14 @@ std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
         throw std::runtime_error("Failed to convert polynomial coefficients to matrices.");
     }
 
-    //!<constant term>
+    //!<Constant term>
     double c = coefficients(0);
 
-    //!<order one term>
+    //!<Order one term>
     int idx_coefficients = dimension + 1;
     auto g = coefficients.segment(1,idx_coefficients-1);
 
-    //!<second order term>
+    //!<Second order term>
     MatrixXd H(dimension, dimension);
     H.setZero(dimension,dimension);
 
