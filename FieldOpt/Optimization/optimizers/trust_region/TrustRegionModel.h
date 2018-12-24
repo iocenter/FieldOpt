@@ -50,24 +50,71 @@ class TrustRegionModel {
     TrustRegionModel(
             const Eigen::Matrix<double,
             Eigen::Dynamic,Eigen::Dynamic>& initial_points,
-            const Eigen::RowVectorXd& initial_fvalues ,
+            const Eigen::RowVectorXd& initial_fvalues,
+            Eigen::VectorXd& lb,
+            Eigen::VectorXd& ub,
             Settings::Optimizer *settings);
+
     int getDimension();
+
     double getRadius();
+
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> getPoints();
+
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> getPointsShifted();
+
     Eigen::RowVectorXd getFunctionValues();
+
     std::vector<Polynomial> getPivotPolynomials();
 
+    std::vector<Polynomial> getModelingPolynomials() { return modeling_polynomials_ ;}
+
+    Eigen::RowVectorXd getPivotValues() { return pivot_values_;}
+
+    /*!
+   * @brief changes TR center pointer to best point
+   * considering lower and upper bounds on variables.
+   */
     void moveToBestPoint();
+
     void criticalityStep();
+
     double checkInterpolation();
-    void rebuildModel();
-    void improveModelNfp();
-    void ensureImprovement();
+
+    /*!
+    * @brief Rebuild the polynomial model
+    * @return True if the model has changed, and false otherwise.
+    */
+    bool rebuildModel();
+
+    /*!
+    * @brief Improve the Newton Fundamental Polynomial model
+    * @return True if the model was improved, and false otherwise.
+    */
+    bool improveModelNfp();
+
+    /*!
+    * @brief Ensure improvement of model.
+     *@return exitflag: 1 = new point calculated,
+     *                  2 = replaced point an existing one that improve geometry,
+     *                  3 = model was old and had to be rebuilt,
+     *                  4 = failed to ensure improvement.
+    * considering lower and upper bounds on variables.
+    */
+    int ensureImprovement();
+
+    /*!
+    * @brief tests whether a model is lambda-poised for the given options.
+    * Important: it assumes there is a finite radius_max defined.    *
+    * pivot_threshold defines how well-poised we demand a model to be.
+    * @return true if the model is lambda poised, and false otherwise.
+    */
     bool isLambdaPoised();
+
     void changeTrCenter(Eigen::VectorXd new_point, Eigen::RowVectorXd fvalues);
+
     std::map<Eigen::VectorXd, Eigen::VectorXd> solveTrSubproblem();
+
     void computePolynomialModels();
 
 
@@ -85,6 +132,8 @@ class TrustRegionModel {
     Eigen::RowVectorXd pivot_values_;
     Eigen::VectorXd index_vector_;
     Eigen::VectorXd distances_;
+    Eigen::VectorXd lb_;
+    Eigen::VectorXd ub_;
 
     double radius_;
     int tr_center_; //!<index of trust region center point in points_abs>
@@ -144,7 +193,7 @@ class TrustRegionModel {
    * @return Polynomial containing the corresponding dimension and coefficients.
    */
     Polynomial matricesToPolynomial(
-            int c0,
+            double c0,
             const Eigen::VectorXd &g0,
             const Eigen::MatrixXd &H);
 
@@ -154,10 +203,9 @@ class TrustRegionModel {
      * @param coefficients coefficients of polynomial.
      * @return tuple<int, Eigen::VectorXd, Eigen::MatrixXd> matrices c, g, and H  respectively.
      */
-    std::tuple<int, Eigen::VectorXd, Eigen::MatrixXd> coefficientsToMatrices(
+    std::tuple<double, Eigen::VectorXd, Eigen::MatrixXd> coefficientsToMatrices(
             int dimension,
             Eigen::VectorXd coefficients);
-
 
 
     /*!
@@ -182,6 +230,7 @@ class TrustRegionModel {
 
     /*!
    * @brief orthogonalize a block from pivot_polynomials_.
+     * Orthogonalize polynomials on present block (deffering subsequent ones)
    * @param point point used to orthogonalize polynomials.
    * @param poly_i polynomial index in pivot_polynomials_.
    * @param poly_i end of the block to be orthogonalized.
@@ -189,10 +238,9 @@ class TrustRegionModel {
    */
     void orthogonalizeBlock(
             Eigen::VectorXd point,
-            int poly_i,
+            int np,
             int block_beginning,
             int block_end);
-
 
     /*!
      * @brief subtract polynomials p1 and p2 so that the result is zero at x.
@@ -204,7 +252,6 @@ class TrustRegionModel {
             Polynomial p1,
             Polynomial p2,
             Eigen::VectorXd x);
-
 
     /*!
      * @brief evaluate polynomial p1 in given point x.
@@ -235,6 +282,64 @@ class TrustRegionModel {
     Polynomial multiplyPolynomial(
             Polynomial p1,
             double factor);
+
+
+
+    /*!
+     * @brief Find the best point of the model, i.e., the one for which the function has minimum value.
+     * @return best point index.
+     */
+    int findBestPoint();
+
+
+    /*!
+     * @brief Compute the modelling polynomials
+     * @return vector with the resulting polynomials.
+     */
+    std::vector<Polynomial> computeQuadraticMNPolynomials();
+
+
+    /*!
+    * @brief Evaluate NFP with finite differences.
+    * @param Number of points in the model.
+    * @return row vector with the size of number of points containing the resulting values
+    */
+    Eigen::RowVectorXd nfpFiniteDifferences(int points_num);
+
+    /*!
+    * @brief Combine polynomials.
+    * @param number of points in the model.
+    * @param coefficient values (alpha).
+    * @return resulting polynomial.
+    */
+    Polynomial combinePolynomials(
+            int points_num,
+            Eigen::RowVectorXd coefficients);
+
+    /*!
+    * @brief Shift polynomial with respect to the TR center.
+    * @param polynomial to be shifted.
+    * @return resulting polynomial.
+    */
+    Polynomial shiftPolynomial(Polynomial polynomial);
+
+    /*!
+    * @brief Check if the model is complete, i.e., number of points is at least (dimension+1)*(dimension+2)/2
+    * @return true if model is complete, and false otherwise.
+    */
+    bool isComplete();
+
+    /*!
+    * @brief Check if model is old, i.e., if the max distance from points to tr center is greater than the radius.
+    * @return true if the model is old, and false otherwise.
+    */
+    bool isOld();
+
+    /*!
+    * @brief Choose worst point and replace it by a new one.
+    * @return true if the worst point was successfully replaced, and false otherwise.
+    */
+    bool chooseAndReplacePoint();
 };
 
 }

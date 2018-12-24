@@ -39,6 +39,7 @@ namespace Optimizers {
 class TrustRegionOptimization : public Optimizer {
  public:
     TerminationCondition IsFinished() override;
+
     TrustRegionOptimization(Settings::Optimizer *settings,
                 Case *base_case,
                 Model::Properties::VariablePropertyContainer *variables,
@@ -47,11 +48,14 @@ class TrustRegionOptimization : public Optimizer {
                 CaseHandler *case_handler=0,
                 Constraints::ConstraintHandler *constraint_handler=0
     );
+
     TrustRegionModel* getTrustRegionModel();
+
     int GetNumInitPoints() { return n_initial_points_; };
 
  protected:
     void handleEvaluatedCase(Case *c) override;
+
     void iterate() override;
 
  private:

@@ -98,7 +98,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
         //cout << initial_fvalues_.format(frmt) << endl;
 
         tr_model_ = new TrustRegionModel(initial_points_, initial_fvalues_,
-                                         settings_);  //!<creates the initial trust region
+                                         lb_, ub_, settings_);  //!<creates the initial trust region
 
         //TODO: improve trust region with the new point
 
@@ -157,7 +157,7 @@ void TrustRegionOptimization::computeInitialPoints() {
             second_point << (second_point.array() - 0.5);
             second_point *= settings_->parameters().tr_initial_radius;
             second_point << initial_point.array() + second_point.array();
-            if(settings_->parameters().tr_lower_bound && settings_->parameters().tr_upper_bound) {
+            if(lb_.size()>0 && ub_.size() >0) {
                 projectToBounds(&second_point);
             }
 

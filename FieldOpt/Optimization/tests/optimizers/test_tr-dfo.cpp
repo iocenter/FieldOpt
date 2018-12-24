@@ -60,13 +60,21 @@ namespace {
                 varcont_tr_dfo_probs_->AddVariable(prop);
             }
 
-            TestResources::FindVarSequence(prob,
-                                           *varcont_tr_dfo_probs_);
-
             // Set up base case using dummy var containter
             test_case_tr_dfo_probs_ = new Optimization::Case(
                     QHash<QUuid, bool>(), QHash<QUuid, int>(),
                     varcont_tr_dfo_probs_->GetContinousVariableValues());
+
+            TestResources::FindVarSequence(prob,
+                                           *test_case_tr_dfo_probs_);
+
+
+            VectorXd ordered_vec(test_case_tr_dfo_probs_->GetRealVarVector().size());
+            auto vec =test_case_tr_dfo_probs_->GetRealVarVector();
+            for (int i=0; i <prob.idx.size(); i++) {
+                ordered_vec(i) = vec(prob.idx[i]);
+            }
+            test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
 
             // Use initial point from Matlab data
             test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
@@ -84,12 +92,13 @@ namespace {
                         double (*tr_dfo_prob)(VectorXd xs)){
 
             stringstream ss; ss << "[          ] " << FMAGENTA;
+            double tol = 1e-06;
 
             // Tentative best case should be equal to base case at this point
             TestResources::PrintCaseData(*tr_dfo_->GetTentativeBestCase(), *tr_dfo_);
-            TestResources::CheckSameX(tr_dfo_->GetTentativeBestCase()->GetRealVarVector(),
-                       prob.xm.col(0), prob.idx, 1e-6,
-                       "Check 1st point equal");
+            TestResources::CheckSameVector(
+                    tr_dfo_->GetTentativeBestCase()->GetRealVarVector(),
+                    prob.xm.col(0), tol, "Check 1st point equal");
 
             while (!tr_dfo_->IsFinished()) {
 
@@ -109,9 +118,20 @@ namespace {
 
                 // PRINT CASE DATA (ID, X, F)
                 TestResources::PrintCaseData(*next_case, *tr_dfo_);
-                TestResources::CheckSameX(next_case->GetRealVarVector(),
-                           prob.xm.col(1), prob.idx, 1e-6,
-                           "Check 2nd point equal");
+
+                // TEST IF CURRENT POINT IS EQUAL
+                TestResources::CheckSameVector(
+                        next_case->GetRealVarVector(),
+                        prob.xm.col(1), 1e-6,
+                        "Check 2nd point equal");
+
+                // TEST PIVOT VALUES (VECTOR) ARE EQUAL
+                TestResources::CheckSameVector(
+                        tr_dfo_->getTrustRegionModel()->getPivotValues(),
+                        prob.vm.col(0), tol, "Check pivot values are equal");
+
+                //auto tr_model = tr_dfo_->getTrustRegionModel();
+                //auto pivot_polynomials = tr_model->getPivotPolynomials();
 
             }
 
@@ -177,4 +197,89 @@ namespace {
         }
         EXPECT_TRUE(is_model_present);
     }
+
+    TEST_F(TrustRegionTest, tr_dfo_initial_rebuild_model) {
+        bool is_model_present = false;
+        SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
+
+        // RUNNER CALL (START)
+        // RUNNER CALL (START)
+        auto next_case = tr_dfo_->GetCaseForEvaluation();
+
+        // COMPUTE OBJ.FUNCTION VALUE FOR CASE
+        next_case->set_objective_function_value(
+                tr_dfo_prob1(next_case->GetRealVarVector()));
+
+        if (tr_dfo_->GetNumInitPoints() == 1 ) {
+            TestResources::OverrideSecondPoint(tr_mdata.prob1, *next_case);
+        }
+
+        // RUNNER CALL (FINISH)
+        tr_dfo_->SubmitEvaluatedCase(next_case);
+
+        auto tr_model = tr_dfo_->getTrustRegionModel();
+        auto pivot_polynomials = tr_model->getPivotPolynomials();
+        auto pivot_values = tr_model->getPivotValues();
+        double tol = 1e-06;
+
+        auto same_pivot_values =  true;
+        for (int i=0; i<pivot_values.size(); i++) {
+            if (abs(pivot_values(i) - tr_mdata.prob1.vm(i,0)) > tol) {
+                same_pivot_values = false;
+            }
+        }
+        auto same_pivot_coeff = true;
+        for (int i=0; i<pivot_polynomials.size(); i++) {
+            if (pivot_polynomials[i].dimension != tr_mdata.prob1.pdm(i)) {
+                same_pivot_coeff = false;
+            }
+
+            for (int j=0; j<pivot_polynomials.size(); j++) {
+                if (abs(pivot_polynomials[i].coefficients(j) -  tr_mdata.prob1.pcm(j,i)) > tol) {
+                    same_pivot_coeff = false;
+                }
+            }
+        }
+        EXPECT_TRUE(same_pivot_values &&  same_pivot_coeff);
+    }
+
+
+    TEST_F(TrustRegionTest, tr_dfo_initial_compute_polynomial_models) {
+        bool is_model_present = false;
+        SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
+
+        // RUNNER CALL (START)
+        auto next_case = tr_dfo_->GetCaseForEvaluation();
+
+        // COMPUTE OBJ.FUNCTION VALUE FOR CASE
+        next_case->set_objective_function_value(
+                tr_dfo_prob1(next_case->GetRealVarVector()));
+
+        if (tr_dfo_->GetNumInitPoints() == 1 ) {
+            TestResources::OverrideSecondPoint(tr_mdata.prob1, *next_case);
+        }
+
+        // RUNNER CALL (FINISH)
+        tr_dfo_->SubmitEvaluatedCase(next_case);
+
+        auto tr_model = tr_dfo_->getTrustRegionModel();
+        auto modeling_polynomials = tr_model->getModelingPolynomials();
+
+        double tol = 1e-06;
+        auto same_modeling_polynomials = true;
+
+        for (int i=0; i<modeling_polynomials.size(); i++)  {
+            if (modeling_polynomials[i].dimension != tr_mdata.prob1.mdm(i)) {
+                same_modeling_polynomials = false;
+            }
+
+            for (int j=0; j<modeling_polynomials[i].coefficients.size(); j++) {
+                if (abs(modeling_polynomials[i].coefficients(j) - tr_mdata.prob1.mcm(j,i)) > tol) {
+                    same_modeling_polynomials = false;
+                }
+            }
+        }
+        EXPECT_TRUE(same_modeling_polynomials);
+    }
+
 }

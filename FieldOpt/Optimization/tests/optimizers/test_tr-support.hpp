@@ -22,6 +22,17 @@
 
 namespace TestResources {
 
+  void CheckSameVector(VectorXd xa, VectorXd xb,
+                  double tol, std::string msg) {
+
+    ASSERT_TRUE(xa.isApprox(xb,tol));
+
+    if( ~msg.empty() ) {
+      stringstream ss; ss << "[          ] " << FMAGENTA;
+      cout << ss.str() << msg.c_str() << " -> ok" << END << endl;
+    }
+  }
+
   void CheckSameX(VectorXd xa, VectorXd xb,
                   vector<int> idx, double tol,
                   std::string msg) {
@@ -43,7 +54,7 @@ namespace TestResources {
   }
 
   void FindVarSequence(TestResources::TrustRegionModelData::prob &prob,
-                       VariablePropertyContainer &varcont_tr_dfo_probs) {
+                       Optimization::Case &base_case_tr_dfo_probs) {
 
     // First vector (Eigen + std formats)
     VectorXd va = prob.xm.col(0); // <- va: VectorXd
@@ -52,10 +63,9 @@ namespace TestResources {
     VectorXd::Map(&v1[0], va.size()) = va; // <- v1: std
 
     // Second vector (Eigen + std formats)
-    // QHash<QUuid,double> vbu = varcont_tr_dfo_probs_->GetContinousVariableValues();
-    list<double> vbl = varcont_tr_dfo_probs.GetContinousVariableValues().values().toStdList();
-    vector<double> v2{ std::begin(vbl), std::end(vbl) }; // <- v2: std
-    Eigen::VectorXd vb = Eigen::Map<VectorXd>(v2.data(), v2.size()); // <- vb: VectorXd
+    Eigen::VectorXd vb = base_case_tr_dfo_probs.GetRealVarVector();
+    vector<double> v2(vb.size());
+    VectorXd::Map(&v2[0], vb.size()) = vb; // <- v2: std
 
     // --------------
     // Eigen approach
@@ -137,7 +147,7 @@ namespace TestResources {
 
     VectorXd xbr(prob.xm.rows(),1);
     for (int ii=0; ii<prob.xm.rows(); ii++) {
-      xbr.row(ii) << prob.xm(prob.idx[ii],1);
+        xbr.row(ii) << prob.xm(ii,1); // a proper order is ensured previously.
     }
 
     // dbg

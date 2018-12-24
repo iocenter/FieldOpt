@@ -10,11 +10,11 @@
 
  FieldOpt is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
+ along with FieldOpt. If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #ifndef FIELDOPT_TEST_TR_DFO_DATA_H
@@ -36,10 +36,13 @@ namespace TestResources {
             Eigen::MatrixXd cm; // tr_model.tr_center
             Eigen::MatrixXd rm; // tr_model.radius
 
-            Eigen::MatrixXd pcm; // tr_model.pivot_polynomials
-            Eigen::MatrixXd pdm; // tr_model.pivot_polynomials
+            Eigen::MatrixXd pcm; // tr_model.pivot_polynomials_coefficients
+            Eigen::MatrixXd pdm; // tr_model.pivot_polynomials_dimensions
 
             Eigen::MatrixXd vm; // tr_model.pivot_values
+
+            Eigen::MatrixXd mcm; // tr_model.modeling_coefficients
+            Eigen::MatrixXd mdm; // tr_model.modeling_dimensions
 
             vector<int> idx;; // 
 
@@ -49,6 +52,13 @@ namespace TestResources {
         prob prob1;
         prob prob2;
         prob prob3;
+        prob prob4;
+        prob prob5;
+        prob prob6;
+        prob prob7;
+        prob prob8;
+        prob prob9;
+        prob prob10;
 
         TrustRegionModelData() {
 
@@ -122,6 +132,19 @@ namespace TestResources {
             // Pivot values:
             prob1.vm.col(0) <<   1.0000000000000000,   0.3147236863931789,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000; 
 
+            // ------------------------------------------------------------------------------------------
+            // C++ [PRINT RESIZE] MODELING COEFFICIENTS
+
+            // Matrix ([6x6]) of column vectors ([6x1])
+            prob1.mcm.resize(6,1); // model.modeling_polynomials.coefficients
+            // Matrix ([1x6]) of column vectors ([1x1])
+            prob1.mdm.resize(1,1); // model.modeling_polynomials.dimension
+
+            // Modeling polynomials (coeff):
+            prob1.mcm.col(0) <<   3.5542667786469249,  -4.0852763136068235,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000; 
+            // Pivot polynomials (dim):
+            prob1.mdm.col(0) <<   2.0000000000000000; 
+
             // ==========================================================================================
             // ==============================  prob2  ==============================
             // ==========================================================================================
@@ -191,6 +214,19 @@ namespace TestResources {
             // Pivot values:
             prob2.vm.col(0) <<   1.0000000000000000,   0.3147236863931790,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000; 
 
+            // ------------------------------------------------------------------------------------------
+            // C++ [PRINT RESIZE] MODELING COEFFICIENTS
+
+            // Matrix ([6x6]) of column vectors ([6x1])
+            prob2.mcm.resize(6,1); // model.modeling_polynomials.coefficients
+            // Matrix ([1x6]) of column vectors ([1x1])
+            prob2.mdm.resize(1,1); // model.modeling_polynomials.dimension
+
+            // Modeling polynomials (coeff):
+            prob2.mcm.col(0) <<   5.6094379124341005,   6.4440725269606025,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000; 
+            // Pivot polynomials (dim):
+            prob2.mdm.col(0) <<   2.0000000000000000; 
+
             // ==========================================================================================
             // ==============================  prob3  ==============================
             // ==========================================================================================
@@ -259,6 +295,19 @@ namespace TestResources {
             prob3.pdm.col(5) <<   2.0000000000000000; 
             // Pivot values:
             prob3.vm.col(0) <<   1.0000000000000000,   0.3147236863931789,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000; 
+
+            // ------------------------------------------------------------------------------------------
+            // C++ [PRINT RESIZE] MODELING COEFFICIENTS
+
+            // Matrix ([6x6]) of column vectors ([6x1])
+            prob3.mcm.resize(6,1); // model.modeling_polynomials.coefficients
+            // Matrix ([1x6]) of column vectors ([1x1])
+            prob3.mdm.resize(1,1); // model.modeling_polynomials.dimension
+
+            // Modeling polynomials (coeff):
+            prob3.mcm.col(0) <<   0.0000000000000000,   0.2606736398633842,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000; 
+            // Pivot polynomials (dim):
+            prob3.mdm.col(0) <<   2.0000000000000000; 
 
 
         }
