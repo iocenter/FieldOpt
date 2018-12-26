@@ -17,6 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
+
 #ifndef FIELDOPT_TRUSTREGION_H
 #define FIELDOPT_TRUSTREGION_H
 
@@ -43,7 +44,7 @@ class TrustRegionOptimization : public Optimizer {
     TerminationCondition IsFinished() override;
 
   TrustRegionOptimization(
-      Settings::Optimizer *settings,
+                Settings::Optimizer *settings,
                 Case *base_case,
                 Model::Properties::VariablePropertyContainer *variables,
                 Reservoir::Grid::Grid *grid,
@@ -62,8 +63,8 @@ class TrustRegionOptimization : public Optimizer {
     void iterate() override;
 
  private:
-  Matrix<double, Dynamic, Dynamic> initial_points_;
-  RowVectorXd initial_fvalues_;
+    Matrix<double, Dynamic, Dynamic> initial_points_;
+    RowVectorXd initial_fvalues_;
     VectorXd lb_, ub_; //!< Upper and lower bounds
     TrustRegionModel *tr_model_;
     int n_initial_points_;
@@ -73,6 +74,7 @@ class TrustRegionOptimization : public Optimizer {
     Case *base_case_;
 
     void computeInitialPoints();
+    void setLowerUpperBounds();
     void projectToBounds(VectorXd *point);
 
     class ConfigurationSummary : public Loggable {

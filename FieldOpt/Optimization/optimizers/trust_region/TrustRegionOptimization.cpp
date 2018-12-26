@@ -25,36 +25,27 @@
 namespace Optimization {
 namespace Optimizers {
 
-TrustRegionOptimization::TrustRegionOptimization(Settings::Optimizer *settings,
-         Case *base_case,
-         Model::Properties::VariablePropertyContainer *variables,
-         Reservoir::Grid::Grid *grid,
-         Logger *logger,
-         CaseHandler *case_handler,
-         Constraints::ConstraintHandler *constraint_handler
+TrustRegionOptimization::TrustRegionOptimization(
+        Settings::Optimizer *settings,
+        Case *base_case,
+        Model::Properties::VariablePropertyContainer *variables,
+        Reservoir::Grid::Grid *grid,
+        Logger *logger,
+        CaseHandler *case_handler,
+        Constraints::ConstraintHandler *constraint_handler
 ) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
-    if (constraint_handler_->HasBoundaryConstraints()) {
-        lb_ = constraint_handler_->GetLowerBounds(base_case->GetRealVarIdVector());
-        ub_ = constraint_handler_->GetUpperBounds(base_case->GetRealVarIdVector());
-    }
-    else {
-        if (settings->parameters().tr_lower_bound && settings->parameters().tr_upper_bound) {
-            lb_.resize(base_case->GetRealVarIdVector().size());
-            ub_.resize(base_case->GetRealVarIdVector().size());
-            lb_.fill(settings->parameters().tr_lower_bound);
-            ub_.fill(settings->parameters().tr_upper_bound);
-        }
-    }
 
     settings_ = settings;
     variables_ = variables;
     base_case_ = base_case;
-    n_initial_points_ = 0;
+
+    setLowerUpperBounds();
 
     if (enable_logging_) { // Log base case
         logger_->AddEntry(this);
     }
 
+    n_initial_points_ = 0;
     computeInitialPoints();
 
     if (enable_logging_) {
@@ -62,7 +53,42 @@ TrustRegionOptimization::TrustRegionOptimization(Settings::Optimizer *settings,
     }
 }
 
-Optimization::Optimizer::TerminationCondition TrustRegionOptimization::IsFinished() {
+void TrustRegionOptimization::setLowerUpperBounds() {
+    
+  if (constraint_handler_->HasBoundaryConstraints()) {
+
+    // Use constraint_handler lower/upper bounds
+    lb_ = constraint_handler_->GetLowerBounds(
+        base_case_->GetRealVarIdVector());
+    ub_ = constraint_handler_->GetUpperBounds(
+        base_case_->GetRealVarIdVector());
+
+  } else {
+
+    // Use lower/upper bounds specified in tr-params
+    if (settings_->parameters().tr_lower_bound
+        && settings_->parameters().tr_upper_bound) {
+
+      lb_.resize(base_case_->GetRealVarIdVector().size());
+      ub_.resize(base_case_->GetRealVarIdVector().size());
+      lb_.fill(settings_->parameters().tr_lower_bound);
+      ub_.fill(settings_->parameters().tr_upper_bound);
+
+    } else {
+
+      Printer::ext_warn(
+          "Lower/upper bounds for DF-TR algorithm not specified.",
+          "Optimization", "TrustRegionOptimization");
+      throw std::runtime_error(
+          "Lower/upper bounds for DF-TR algorithm not specified.");
+
+    }
+  }
+}
+
+// ===================================================================
+Optimization::Optimizer::TerminationCondition
+TrustRegionOptimization::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
     if (case_handler_->CasesBeingEvaluated().size() > 0)
         return tc;
