@@ -24,12 +24,14 @@
 #include "Optimization/optimizers/trust_region/TrustRegionModel.h"
 #include <Eigen/Core>
 
+using namespace Eigen;
+
 namespace Optimization {
 namespace Optimizers {
 
-
 /*!
- * @brief This class is an implementation of a Trust Region (TR) algorithm for derivative-free optimization
+ * @brief This class is an implementation of a Trust Region (TR)
+ * algorithm for derivative-free optimization
  *
  * \todo Derivative-free Optimization algorithm
  * \todo TR model
@@ -40,7 +42,8 @@ class TrustRegionOptimization : public Optimizer {
  public:
     TerminationCondition IsFinished() override;
 
-    TrustRegionOptimization(Settings::Optimizer *settings,
+  TrustRegionOptimization(
+      Settings::Optimizer *settings,
                 Case *base_case,
                 Model::Properties::VariablePropertyContainer *variables,
                 Reservoir::Grid::Grid *grid,
@@ -59,14 +62,15 @@ class TrustRegionOptimization : public Optimizer {
     void iterate() override;
 
  private:
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> initial_points_;
-    Eigen::RowVectorXd initial_fvalues_;
+  Matrix<double, Dynamic, Dynamic> initial_points_;
+  RowVectorXd initial_fvalues_;
     VectorXd lb_, ub_; //!< Upper and lower bounds
+    TrustRegionModel *tr_model_;
+    int n_initial_points_;
+
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
     Case *base_case_;
-    TrustRegionModel *tr_model_;
-    int n_initial_points_;
 
     void computeInitialPoints();
     void projectToBounds(VectorXd *point);
