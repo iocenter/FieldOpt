@@ -51,23 +51,19 @@ class TrustRegionModel {
    */
     TrustRegionModel();
     TrustRegionModel(
-            const Matrix<double,
-            Dynamic,Dynamic>& initial_points,
+            const Matrix<double,Dynamic,Dynamic>& initial_points,
             const RowVectorXd& initial_fvalues,
             VectorXd& lb,
             VectorXd& ub,
             Settings::Optimizer *settings);
 
     int getDimension();
-
     double getRadius();
 
     Matrix<double,Dynamic,Dynamic> getPoints();
-
     Matrix<double,Dynamic,Dynamic> getPointsShifted();
 
     RowVectorXd getFunctionValues();
-
     std::vector<Polynomial> getPivotPolynomials();
 
     std::vector<Polynomial> getModelingPolynomials() { return modeling_polynomials_ ;}
@@ -173,7 +169,8 @@ class TrustRegionModel {
             const VectorXd &ind);
 
     /*!
-   * @brief sort matrix of column vectors (points) for a given index ordering.
+  * @brief sort matrix of column vectors (points)
+  * for a given index ordering.
    * @param &points pointer to the matrix of points.
    * @param &ind pointer to the vector of ordered index.
    */
@@ -183,7 +180,8 @@ class TrustRegionModel {
 
 
      /*!
-    * @brief Build a Newton Fundamental Polynomial basis for the corresponding dimenion.
+  * @brief Build a Newton Fundamental Polynomial
+   * basis for the corresponding dimenion.
     * @param dim polynomial basis dimension.
     */
     void nfpBasis(int dim);

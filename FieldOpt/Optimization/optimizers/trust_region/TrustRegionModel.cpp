@@ -30,7 +30,6 @@
 #include <numeric>
 #include <functional>
 
-// ___________________________________________________________________
 using namespace Eigen;
 
 namespace Optimization {
@@ -543,7 +542,8 @@ Polynomial TrustRegionModel::matricesToPolynomial(
             coefficients(ind_coefficients) = H(k, m);
 
             if (H(m, k) != H(k, m)) {
-                Printer::ext_info("H not symmetrical: ","Optimization", "Trust Region");
+        Printer::ext_info("H not symmetrical: ",
+                          "Optimization", "Trust Region");
             }
         }
     }
@@ -564,8 +564,10 @@ std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
 
     int n_terms = (dimension+1)*(dimension+2)/2;
     if (coefficients.size() != n_terms) {
-        Printer::ext_warn("Wrong dimension of coefficients.", "Optimization", "TrustRegionModel");
-        throw std::runtime_error("Failed to convert polynomial coefficients to matrices.");
+    Printer::ext_warn("Wrong dimension of coefficients.",
+                      "Optimization", "TrustRegionModel");
+    throw std::runtime_error(
+        "Failed to convert polynomial coefficients to matrices.");
     }
 
     //!<Constant term>
@@ -614,7 +616,9 @@ Polynomial TrustRegionModel::orthogonalizeToOtherPolynomials(
     auto polynomial = pivot_polynomials_[poly_i];
     for (int n=0; n<=last_pt; n++) {
         if (n != poly_i) {
-            polynomial = zeroAtPoint(polynomial, pivot_polynomials_[n], points_shifted_.col(n));
+      polynomial = zeroAtPoint(polynomial,
+                               pivot_polynomials_[n],
+                               points_shifted_.col(n));
         }
     }
     return polynomial;
@@ -677,8 +681,12 @@ Polynomial TrustRegionModel::addPolynomial(
         Polynomial p1,
         Polynomial p2) {
     if (p1.dimension != p2.dimension) {
-        Printer::ext_warn("Summation of polynomials with different dimensions.", "Optimization", "TrustRegionModel");
-        throw std::runtime_error("Failed to compute add polynomials. They have different dimensions.");
+    Printer::ext_warn(
+        "Summation of polynomials "
+        "with different dimensions.",
+        "Optimization", "TrustRegionModel");
+    throw std::runtime_error("Failed to compute add polynomials. "
+                             "They have different dimensions.");
     }
 
     Polynomial p;
@@ -687,8 +695,10 @@ Polynomial TrustRegionModel::addPolynomial(
     p.coefficients = p1.coefficients + p2.coefficients;
 
     if (p.coefficients.size() == 0) {
-        Printer::ext_warn("Empty resulting polynomial.", "Optimization", "TrustRegionModel");
-        throw std::runtime_error("Failed to compute add polynomials. The resulting polynomial is empty.");
+    Printer::ext_warn("Empty resulting polynomial.",
+                      "Optimization", "TrustRegionModel");
+    throw std::runtime_error("Failed to compute add polynomials. "
+                             "The resulting polynomial is empty.");
     }
 
     return p;
@@ -787,13 +797,17 @@ RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
 Polynomial TrustRegionModel::combinePolynomials(
         int points_num,
         RowVectorXd coefficients) {
-    auto polynomials = std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
+  auto polynomials = std::vector<Polynomial>(
+      pivot_polynomials_.begin(),
+      pivot_polynomials_.begin() + points_num);
 
     int terms = polynomials.size();
     if ((terms == 0) || (coefficients.size() != terms)) {
-        Printer::ext_warn("Polynomial and coefficients have different sizes.", "Optimization", "TrustRegionModel");
+    Printer::ext_warn("Polynomial and coefficients have different sizes.",
+        "Optimization", "TrustRegionModel");
         throw std::runtime_error(
-                "Failed to combine polynomials. Polynomial and coefficients have different dimensions.");
+        "Failed to combine polynomials. Polynomial "
+        "and coefficients have different dimensions.");
     }
 
     auto p = multiplyPolynomial(polynomials[0], coefficients(0));
@@ -826,7 +840,8 @@ bool TrustRegionModel::isComplete() {
     int points_num = points_abs_.cols();
     int max_terms = ((dim+1)*(dim+2))/2;
     if (points_num > max_terms) {
-        Printer::ext_warn("Too many points in the Trust Region model.", "Optimization", "TrustRegionModel");
+    Printer::ext_warn("Too many points in the Trust Region model.",
+        "Optimization", "TrustRegionModel");
     }
     return (points_num >= max_terms );;
 }

@@ -88,14 +88,17 @@ void TrustRegionOptimization::setLowerUpperBounds() {
   }
 }
 
-// ===================================================================
 Optimization::Optimizer::TerminationCondition
 TrustRegionOptimization::IsFinished() {
+
     TerminationCondition tc = NOT_FINISHED;
-    if (case_handler_->CasesBeingEvaluated().size() > 0)
+  if (case_handler_->CasesBeingEvaluated().size() > 0) {
         return tc;
-    if (evaluated_cases_ > max_evaluations_)
+  }
+
+  if (evaluated_cases_ > max_evaluations_) {
         tc = MAX_EVALS_REACHED;
+  }
     if (tc != NOT_FINISHED) {
         if (enable_logging_) {
             logger_->AddEntry(this);
@@ -103,36 +106,42 @@ TrustRegionOptimization::IsFinished() {
     }
     return tc;
 }
+
 void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
     IOFormat frmt(3, 0, " ", "\n", "             [", "]");
 
-    if ((n_initial_points_  < 1) && (case_handler_->CasesBeingEvaluated().size() == 0)) {
-        Printer::ext_warn("Insufficient number of points to create the Trust Region model.", "Optimization", "TrustRegionOptimization");
-        throw std::runtime_error("Failed to initialize Trust Region Optimizer.");
-    } else if (n_initial_points_ == 1 ) { //!<just evaluated the second point, so we are ready to build the quadratic model for the TR
+    if ((n_initial_points_  < 1)
+    && (case_handler_->CasesBeingEvaluated().size() == 0)) {
+
+        Printer::ext_warn(
+                "Insufficient # of points to create the Trust Region model.",
+                "Optimization", "TrustRegionOptimization");
+        throw std::runtime_error(
+                "Failed to initialize Trust Region Optimizer.");
+
+      // Just evaluated the second point, so we are ready
+      // to build the quadratic model for the TR
+    } else if (n_initial_points_ == 1 ) {
+
         initial_points_.col(1) = c->GetRealVarVector();
         initial_fvalues_(1) = c->objective_function_value();
         n_initial_points_++;
 
-        //!<dbg>
-        //cout << "[          ] initial_points_" << endl;
-        //cout << initial_points_.format(frmt) << endl;
-
-        //cout << "[          ] initial_fvalues_" << endl;
-        //cout << initial_fvalues_.format(frmt) << endl;
-
+        // Creates the initial trust region
         tr_model_ = new TrustRegionModel(initial_points_, initial_fvalues_,
-                                         lb_, ub_, settings_);  //!<creates the initial trust region
+                                         lb_, ub_, settings_);
 
         //TODO: improve trust region with the new point
 
         if (isImprovement(c)) {
             updateTentativeBestCase(c);
-            Printer::ext_info("Found new tentative best case: " + Printer::num2str(c->objective_function_value()),
-                              "Optimization", "Trust Region");
+            Printer::ext_info("Found new tentative best case: "
+            + Printer::num2str(c->objective_function_value()),
+                                  "Optimization", "Trust Region");
         }
     }
 }
+
 void TrustRegionOptimization::iterate() {
     // TODO: implement the main iteration for the TR optimization algorithm
 
@@ -233,6 +242,7 @@ void TrustRegionOptimization::projectToBounds(VectorXd *point) {
 Loggable::LogTarget TrustRegionOptimization::ConfigurationSummary::GetLogTarget() {
     return LOG_SUMMARY;
 }
+
 QUuid TrustRegionOptimization::ConfigurationSummary::GetId() {
     return QUuid(); // Null UUID
 }
