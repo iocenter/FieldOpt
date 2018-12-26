@@ -194,13 +194,16 @@ bool TrustRegionModel::rebuildModel() {
 
     //!<Gaussian elimination (using previous points)>
     for (int iter = 1; iter < polynomials_num; iter++) {
+
+        pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
+
         double max_layer;
         double farthest_point = distances_(distances_.size() - 1);
         double distance_farthest_point = (double) (farthest_point / radius_);
+
         int block_beginning;
         int block_end;
 
-        pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
         if (poly_i <= dim) {
             block_beginning = 1;
             block_end = dim;
