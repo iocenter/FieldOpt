@@ -3,6 +3,8 @@ project( ERT C CXX )
 
 include(GNUInstallDirs)
 
+cmake_policy(SET CMP0054 OLD)
+
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 OLD)
 endif()
