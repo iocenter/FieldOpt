@@ -62,10 +62,6 @@ TrustRegionOptimization::TrustRegionOptimization(Settings::Optimizer *settings,
     }
 }
 
-TrustRegionModel* TrustRegionOptimization::getTrustRegionModel() {
-    return tr_model_;
-}
-
 Optimization::Optimizer::TerminationCondition TrustRegionOptimization::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
     if (case_handler_->CasesBeingEvaluated().size() > 0)
