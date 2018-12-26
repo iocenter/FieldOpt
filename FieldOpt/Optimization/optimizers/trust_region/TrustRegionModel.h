@@ -26,9 +26,11 @@
 #include <vector>
 #include <tuple>
 
+using namespace Eigen;
+
 struct Polynomial {
     int dimension = 0;
-    Eigen::VectorXd coefficients;
+    VectorXd coefficients;
 };
 
 namespace Optimization {
@@ -48,28 +50,28 @@ class TrustRegionModel {
    */
     TrustRegionModel();
     TrustRegionModel(
-            const Eigen::Matrix<double,
-            Eigen::Dynamic,Eigen::Dynamic>& initial_points,
-            const Eigen::RowVectorXd& initial_fvalues,
-            Eigen::VectorXd& lb,
-            Eigen::VectorXd& ub,
+            const Matrix<double,
+            Dynamic,Dynamic>& initial_points,
+            const RowVectorXd& initial_fvalues,
+            VectorXd& lb,
+            VectorXd& ub,
             Settings::Optimizer *settings);
 
     int getDimension();
 
     double getRadius();
 
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> getPoints();
+    Matrix<double,Dynamic,Dynamic> getPoints();
 
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> getPointsShifted();
+    Matrix<double,Dynamic,Dynamic> getPointsShifted();
 
-    Eigen::RowVectorXd getFunctionValues();
+    RowVectorXd getFunctionValues();
 
     std::vector<Polynomial> getPivotPolynomials();
 
     std::vector<Polynomial> getModelingPolynomials() { return modeling_polynomials_ ;}
 
-    Eigen::RowVectorXd getPivotValues() { return pivot_values_;}
+    RowVectorXd getPivotValues() { return pivot_values_;}
 
     /*!
    * @brief changes TR center pointer to best point
@@ -111,9 +113,9 @@ class TrustRegionModel {
     */
     bool isLambdaPoised();
 
-    void changeTrCenter(Eigen::VectorXd new_point, Eigen::RowVectorXd fvalues);
+    void changeTrCenter(VectorXd new_point, RowVectorXd fvalues);
 
-    std::map<Eigen::VectorXd, Eigen::VectorXd> solveTrSubproblem();
+    std::map<VectorXd, VectorXd> solveTrSubproblem();
 
     void computePolynomialModels();
 
@@ -122,18 +124,18 @@ class TrustRegionModel {
     Settings::Optimizer *settings_;
     std::vector<Polynomial> pivot_polynomials_;
     std::vector<Polynomial> modeling_polynomials_;
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> all_points_;
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_abs_;
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_shifted_;
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> cached_points_;
-    Eigen::RowVectorXd all_fvalues_;
-    Eigen::RowVectorXd fvalues_;
-    Eigen::RowVectorXd cached_fvalues_;
-    Eigen::RowVectorXd pivot_values_;
-    Eigen::VectorXd index_vector_;
-    Eigen::VectorXd distances_;
-    Eigen::VectorXd lb_;
-    Eigen::VectorXd ub_;
+    Matrix<double,Dynamic,Dynamic> all_points_;
+    Matrix<double,Dynamic,Dynamic> points_abs_;
+    Matrix<double,Dynamic,Dynamic> points_shifted_;
+    Matrix<double,Dynamic,Dynamic> cached_points_;
+    RowVectorXd all_fvalues_;
+    RowVectorXd fvalues_;
+    RowVectorXd cached_fvalues_;
+    RowVectorXd pivot_values_;
+    VectorXd index_vector_;
+    VectorXd distances_;
+    VectorXd lb_;
+    VectorXd ub_;
 
     double radius_;
     int tr_center_; //!<index of trust region center point in points_abs>
@@ -156,8 +158,8 @@ class TrustRegionModel {
    * @param &ind pointer to the vector of ordered index.
    */
     void sortVectorByIndex(
-            Eigen::RowVectorXd &vec,
-            const Eigen::VectorXd &ind);
+            RowVectorXd &vec,
+            const VectorXd &ind);
 
 
     /*!
@@ -166,8 +168,8 @@ class TrustRegionModel {
    * @param &ind pointer to the vector of ordered index.
    */
     void sortVectorByIndex(
-            Eigen::VectorXd &vec,
-            const Eigen::VectorXd &ind);
+            VectorXd &vec,
+            const VectorXd &ind);
 
     /*!
    * @brief sort matrix of column vectors (points) for a given index ordering.
@@ -175,8 +177,8 @@ class TrustRegionModel {
    * @param &ind pointer to the vector of ordered index.
    */
     void sortMatrixByIndex(
-            Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &points,
-            const Eigen::VectorXd &ind);
+            Matrix<double,Dynamic,Dynamic> &points,
+            const VectorXd &ind);
 
 
      /*!
@@ -194,18 +196,18 @@ class TrustRegionModel {
    */
     Polynomial matricesToPolynomial(
             double c0,
-            const Eigen::VectorXd &g0,
-            const Eigen::MatrixXd &H);
+            const VectorXd &g0,
+            const MatrixXd &H);
 
     /*!
      * @brief converts polynomial coefficients to matrices c, g, H
      * @param dimension dimension of polynomial.
      * @param coefficients coefficients of polynomial.
-     * @return tuple<int, Eigen::VectorXd, Eigen::MatrixXd> matrices c, g, and H  respectively.
+     * @return tuple<int, VectorXd, MatrixXd> matrices c, g, and H  respectively.
      */
-    std::tuple<double, Eigen::VectorXd, Eigen::MatrixXd> coefficientsToMatrices(
+    std::tuple<double, VectorXd, MatrixXd> coefficientsToMatrices(
             int dimension,
-            Eigen::VectorXd coefficients);
+            VectorXd coefficients);
 
 
     /*!
@@ -237,7 +239,7 @@ class TrustRegionModel {
    * @param block_beginning beginning of the block to be orthogonalized.
    */
     void orthogonalizeBlock(
-            Eigen::VectorXd point,
+            VectorXd point,
             int np,
             int block_beginning,
             int block_end);
@@ -251,7 +253,7 @@ class TrustRegionModel {
     Polynomial zeroAtPoint(
             Polynomial p1,
             Polynomial p2,
-            Eigen::VectorXd x);
+            VectorXd x);
 
     /*!
      * @brief evaluate polynomial p1 in given point x.
@@ -261,7 +263,7 @@ class TrustRegionModel {
      */
     double evaluatePolynomial(
             Polynomial p1,
-            Eigen::VectorXd x);
+            VectorXd x);
 
     /*!
      * @brief Add two polynomials.
@@ -304,7 +306,7 @@ class TrustRegionModel {
     * @param Number of points in the model.
     * @return row vector with the size of number of points containing the resulting values
     */
-    Eigen::RowVectorXd nfpFiniteDifferences(int points_num);
+    RowVectorXd nfpFiniteDifferences(int points_num);
 
     /*!
     * @brief Combine polynomials.
@@ -314,7 +316,7 @@ class TrustRegionModel {
     */
     Polynomial combinePolynomials(
             int points_num,
-            Eigen::RowVectorXd coefficients);
+            RowVectorXd coefficients);
 
     /*!
     * @brief Shift polynomial with respect to the TR center.
