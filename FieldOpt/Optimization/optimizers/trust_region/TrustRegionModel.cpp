@@ -86,30 +86,6 @@ TrustRegionModel::TrustRegionModel(
     }
 }
 
-int TrustRegionModel::getDimension() {
-    return dim_;
-}
-
-double TrustRegionModel::getRadius() {
-    return radius_;
-}
-
-Matrix<double,Dynamic,Dynamic> TrustRegionModel::getPoints() {
-    return points_abs_;
-}
-
-Matrix<double,Dynamic,Dynamic> TrustRegionModel::getPointsShifted() {
-    return points_shifted_;
-}
-
-RowVectorXd TrustRegionModel::getFunctionValues() {
-    return fvalues_;
-}
-
-std::vector<Polynomial> TrustRegionModel::getPivotPolynomials() {
-    return pivot_polynomials_;
-}
-
 void TrustRegionModel::moveToBestPoint() {
     auto best_i = findBestPoint();
     if (best_i != tr_center_) {

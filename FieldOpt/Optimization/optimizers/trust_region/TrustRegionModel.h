@@ -57,19 +57,18 @@ class TrustRegionModel {
             VectorXd& ub,
             Settings::Optimizer *settings);
 
-    int getDimension();
-    double getRadius();
+    int TrustRegionModel::getDimension() { return dim_; }
+    double TrustRegionModel::getRadius() { return radius_; }
 
-    Matrix<double,Dynamic,Dynamic> getPoints();
-    Matrix<double,Dynamic,Dynamic> getPointsShifted();
+    Matrix<double,Dynamic,Dynamic> TrustRegionModel::getPoints() { return points_abs_; }
+    Matrix<double,Dynamic,Dynamic> TrustRegionModel::getPointsShifted() { return points_shifted_; }
 
-    RowVectorXd getFunctionValues();
-    std::vector<Polynomial> getPivotPolynomials();
+    RowVectorXd TrustRegionModel::getFunctionValues() { return fvalues_; }
+    std::vector<Polynomial> TrustRegionModel::getPivotPolynomials() { return pivot_polynomials_; }
 
     std::vector<Polynomial> getModelingPolynomials() { return modeling_polynomials_ ;}
-
     RowVectorXd getPivotValues() { return pivot_values_;}
-
+    
     /*!
    * @brief changes TR center pointer to best point
    * considering lower and upper bounds on variables.
