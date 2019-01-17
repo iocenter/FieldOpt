@@ -24,20 +24,6 @@
 
 namespace Optimization {
 
-Optimizer::Optimizer(Settings::Optimizer *settings,
-     Case *base_case,
-     Model::Model *model,
-     Simulation::Simulator *simulator,
-     Optimization::Objective::Objective *objective_function,
-     Logger *logger,
-     CaseHandler *case_handler,
-     Constraints::ConstraintHandler *constraint_handler
-)
-{
-
-
-}
-
 Optimizer::Optimizer(Settings::Optimizer *settings, Case *base_case,
                      Model::Properties::VariablePropertyContainer *variables,
                      Reservoir::Grid::Grid *grid,
@@ -55,6 +41,7 @@ Optimizer::Optimizer(Settings::Optimizer *settings, Case *base_case,
 
     max_evaluations_ = settings->parameters().max_evaluations;
     tentative_best_case_ = base_case;
+
     if (case_handler == 0) {
         case_handler_ = new CaseHandler(tentative_best_case_);
     }

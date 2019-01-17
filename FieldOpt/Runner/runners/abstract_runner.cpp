@@ -245,12 +245,10 @@ void AbstractRunner::InitializeOptimizer()
 
             optimizer_ = new Optimization::Optimizers::TrustRegionOptimization(settings_->optimizer(),
                                                                                base_case_,
-                                                                               model_,
-                                                                               simulator_,
-                                                                               objective_function_,
+                                                                               model_->variables(),
+                                                                               model_->grid(),
                                                                                logger_
-            );
-
+                                                                               );
             optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
             break;
         default:

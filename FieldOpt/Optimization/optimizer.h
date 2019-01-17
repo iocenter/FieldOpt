@@ -148,16 +148,6 @@ class Optimizer : public Loggable
             Constraints::ConstraintHandler *constraint_handler=0
   );
 
-  Optimizer(::Settings::Optimizer *settings,
-            Case *base_case,
-            Model::Model *model,
-            Simulation::Simulator *simulator,
-            Optimization::Objective::Objective *objective_function,
-            Logger *logger,
-            CaseHandler *case_handler=0,
-            Constraints::ConstraintHandler *constraint_handler=0
-  );
-
   /*!
    * @brief Handle an incomming evaluated case. This is called at the end of the SubmitEvaluatedCase method.
    * @param c

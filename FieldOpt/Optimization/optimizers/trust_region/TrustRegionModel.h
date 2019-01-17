@@ -64,11 +64,7 @@ class TrustRegionModel {
             const RowVectorXd& initial_fvalues,
             VectorXd& lb,
             VectorXd& ub,
-            Settings::Optimizer *settings,
-            Model::Model *model,
-            Simulation::Simulator *simulator,
-            Optimization::Objective::Objective *objective_function,
-            Case *base_case
+            Settings::Optimizer *settings
             );
 
     int getDimension() { return dim_; }
@@ -111,6 +107,7 @@ class TrustRegionModel {
      *                  2 = replaced point an existing one that improve geometry,
      *                  3 = model was old and had to be rebuilt,
      *                  4 = failed to ensure improvement.
+     *                  5 = new points found, returning for function evaluation.
     * considering lower and upper bounds on variables.
     */
     int ensureImprovement();
@@ -129,7 +126,6 @@ class TrustRegionModel {
 
     void computePolynomialModels();
 
-
     /*!
    * @brief evaluates function values at the new points
    * @param new_points_abs new points in absolute coordinates
@@ -137,6 +133,49 @@ class TrustRegionModel {
    * and the second element is a boolean indicating whether the function evaluations succeeded.
    */
     std::tuple<Eigen::RowVectorXd, bool> evaluateNewFvalues(Eigen::MatrixXd new_points_abs);
+
+
+    // Model methods
+    bool isInitialized() const { return is_initialized_; };
+    bool hasModelChanged() const { return model_changed_; };
+    void setIsInitialized(bool s) { is_initialized_ = s; };
+    void setModelChanged(bool s) { model_changed_ = s; };
+
+    // Initialization cases
+    bool areInitPointsComputed() const { return init_points_computed_; };
+    void addInitializationCase(Case *c) { initialization_cases_.append(c); };
+    void addTempInitCase(Case *c) { temp_init_cases_.append(c); };
+    void submitTempInitCases() { initialization_cases_ = temp_init_cases_; };
+    void setAreInitPointsComputed(bool s) { init_points_computed_ = s; };
+
+    // Improvement cases
+    bool areImprovementPointsComputed() const { return impr_points_computed_; };
+    void addImprovementCase(Case *c) { improvement_cases_.append(c); };
+    void addTempImprCase(Case *c) { temp_impr_cases_.append(c); };
+    void submitTempImprCases() { improvement_cases_ = temp_impr_cases_; };
+    void setAreImprPointsComputed(bool s) { impr_points_computed_ = s; };
+
+    bool hasOnlyOnePoint() const { return points_abs_.cols() < 2; };
+    bool isImprovementNeeded() const { return needs_improvement_; };
+    void setIsImprovementNeeded(bool s) { needs_improvement_ = s; };
+
+
+    /*!
+    * @brief
+    * @param
+    * @return Returns the cases needed to initialize TRModel
+    */
+    QList<Case *> getInitializationCases() { return initialization_cases_; };
+
+    QList<Case *> getImprovementCases() { return improvement_cases_;};
+
+    /*!
+    * @brief Method that attempts to initialize TRModel
+    * Sets is_model_initialized_ = true if initialization successful
+    * @param
+    * @return
+    */
+    void submitInitializationCases(QList<Case *>);
 
  private:
     Settings::Optimizer *settings_;
@@ -155,10 +194,6 @@ class TrustRegionModel {
     VectorXd lb_;
     VectorXd ub_;
 
-    Model::Model *model_;
-    Simulation::Simulator *simulator_;
-    Optimization::Objective::Objective *objective_function_;
-
     Case *base_case_;
     CaseHandler *case_handler_;
 
@@ -166,6 +201,21 @@ class TrustRegionModel {
     int tr_center_; //!<index of trust region center point in points_abs>
     int cache_max_;
     int dim_;
+
+    // TRModel status properties
+    bool is_initialized_;
+    bool model_changed_;
+
+    // Initialization points status properties
+    bool init_points_computed_;
+    QList<Case *> initialization_cases_;
+    QList<Case *> temp_init_cases_;
+
+    // Improvement points status properties
+    bool impr_points_computed_;
+    bool needs_improvement_;
+    QList<Case *> improvement_cases_;
+    QList<Case *> temp_impr_cases_;
 
    /*!
    * @brief shift the point
@@ -320,7 +370,6 @@ class TrustRegionModel {
      */
     int findBestPoint();
 
-
     /*!
      * @brief Compute the modelling polynomials
      * @return vector with the resulting polynomials.
@@ -369,7 +418,6 @@ class TrustRegionModel {
     * @return true if the worst point was successfully replaced, and false otherwise.
     */
     bool chooseAndReplacePoint();
-
 
     /*!
     * @brief Find a new point using the trust region.

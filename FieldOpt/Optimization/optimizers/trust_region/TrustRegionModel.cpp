@@ -54,49 +54,44 @@ TrustRegionModel::TrustRegionModel(
     const RowVectorXd& initial_fvalues,
     VectorXd& lb,
     VectorXd& ub,
-    Settings::Optimizer *settings,
-    Model::Model *model,
-    Simulation::Simulator *simulator,
-    Optimization::Objective::Objective *objective_function,
-    Case *base_case) {
+    Settings::Optimizer *settings) {
 
-  model_ = model;
-  simulator_ = simulator;
-  objective_function_ = objective_function;
-  base_case_ = base_case;
+    init_points_computed_ = false;
+    is_initialized_ = false;
+    needs_improvement_ = false;
+    model_changed_ = false;
 
+    lb_ = lb;
+    ub_ = ub;
 
-  lb_ = lb;
-  ub_ = ub;
+    settings_ = settings;
+    radius_ = settings_->parameters().tr_initial_radius;
+    tr_center_ = 0;
+    dim_ = (int)initial_points.rows();
+    cache_max_ = (int)3*pow(dim_,2);
 
-  settings_ = settings;
-  radius_ = settings_->parameters().tr_initial_radius;
-  tr_center_ = 0;
-  dim_ = (int)initial_points.rows();
-  cache_max_ = (int)3*pow(dim_,2);
+    points_abs_.setZero(initial_points.rows(), initial_points.cols());
+    points_abs_ << initial_points;
 
-  points_abs_.setZero(initial_points.rows(), initial_points.cols());
-  points_abs_ << initial_points;
+    fvalues_.setZero(initial_fvalues.size());
+    fvalues_ << initial_fvalues;
 
-  fvalues_.setZero(initial_fvalues.size());
-  fvalues_ << initial_fvalues;
+    pivot_values_.resize(0);
+    cached_fvalues_.resize(0);
 
-  pivot_values_.resize(0);
-  cached_fvalues_.resize(0);
+    index_vector_.resize(0);
+    distances_.resize(0);
 
-  index_vector_.resize(0);
-  distances_.resize(0);
+    cached_points_.resize(0,0);
+    points_shifted_.resize(0,0);
 
-  cached_points_.resize(0,0);
-  points_shifted_.resize(0,0);
+    // rebuildModel();
+    // moveToBestPoint();
+    // computePolynomialModels();
 
-  rebuildModel();
-  moveToBestPoint();
-  computePolynomialModels();
-
-  if (points_abs_.cols() < 2) {
-    ensureImprovement();
-  }
+    // if (points_abs_.cols() < 2) {
+    // ensureImprovement();
+    // }
 }
 
 void TrustRegionModel::moveToBestPoint() {
@@ -246,10 +241,14 @@ double TrustRegionModel::checkInterpolation() {
 }
 
 bool TrustRegionModel::rebuildModel() {
-  double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
+
+  double pivot_threshold =
+          settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
 
   //!<All points we know>
-  all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
+  all_points_.resize(points_abs_.rows(),
+          points_abs_.cols() + cached_points_.cols());
+
   if (cached_points_.size() == 0) {
     all_points_ = points_abs_;
   } else {
@@ -314,7 +313,8 @@ bool TrustRegionModel::rebuildModel() {
   //!<Gaussian elimination (using previous points)>
   for (int iter = 1; iter < polynomials_num; iter++) {
 
-    pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
+    pivot_polynomials_[poly_i] =
+            orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
     double max_layer;
     double farthest_point = (double)distances_(distances_.size()-1);
@@ -357,7 +357,8 @@ bool TrustRegionModel::rebuildModel() {
           break; //!<for n>
         }
 
-        auto val = evaluatePolynomial(pivot_polynomials_[poly_i], points_shifted_.col(n));
+        auto val = evaluatePolynomial(
+                pivot_polynomials_[poly_i], points_shifted_.col(n));
         val = val / dist_max; //!<minor adjustment>
         if (abs(max_absval) < abs(val)) {
           max_absval = val;
@@ -390,7 +391,8 @@ bool TrustRegionModel::rebuildModel() {
       pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
       //!<Orthogonalize polynomials on present block (deferring subsequent ones)>
-      orthogonalizeBlock(points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
+      orthogonalizeBlock(
+              points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
 
       last_pt_included = pt_next;
       poly_i++;
@@ -432,6 +434,7 @@ bool TrustRegionModel::rebuildModel() {
 }
 
 bool TrustRegionModel::improveModelNfp() {
+
   auto rel_pivot_threshold = settings_->parameters().tr_pivot_threshold;
   auto tol_radius = settings_->parameters().tr_tol_radius;
   auto radius_factor = settings_->parameters().tr_radius_factor;
@@ -501,8 +504,10 @@ bool TrustRegionModel::improveModelNfp() {
       }
       int next_position = p_ini;
       double radius_used = radius;
+
       //!<Possibly try smaller radius>
       for (int attempts = 1; attempts<=3; attempts++) {
+
         //!<Iterate through available polynomials>
         for (poly_i = next_position; poly_i<=block_end; poly_i++) {
 
@@ -515,7 +520,18 @@ bool TrustRegionModel::improveModelNfp() {
               auto new_pivot_value = new_pivots(found_i);
               Eigen::MatrixXd new_point_abs = unshift_point(new_point_shifted);
               new_fvalues.resize(new_point_abs.cols());
-              std::tie(new_fvalues, f_succeeded) = evaluateNewFvalues(new_point_abs);
+
+              needs_improvement_ = true;
+              for (int ii = 0; ii < new_point_abs.cols(); ii++) {
+                Case *new_case = new Case(base_case_);
+                new_case->SetRealVarValues(new_point_abs.col(ii));
+                addImprovementCase(new_case);
+              }
+
+              return 5;
+
+//              std::tie(new_fvalues, f_succeeded) = evaluateNewFvalues(new_point_abs);
+
               if (f_succeeded) {
                 break;
               }
@@ -523,9 +539,10 @@ bool TrustRegionModel::improveModelNfp() {
             if (f_succeeded) {
               break;  //!<Stop trying pivot polynomials for poly_i>
             }
-          }
+          } // end if (point_found)
           //!<Attempt another polynomial if did not break>
-        }
+        } // end for loop
+
         if (point_found && f_succeeded) {
           break; //!<(for attempts)>
         } else if (point_found) {
@@ -537,7 +554,8 @@ bool TrustRegionModel::improveModelNfp() {
         } else {
           break;
         }
-      }
+      } // end for (int attempts...
+
       if (point_found && f_succeeded) {
         //!<Update this polynomial in the set>
         pivot_polynomials_[poly_i] = polynomial;
@@ -571,6 +589,7 @@ bool TrustRegionModel::improveModelNfp() {
 }
 
 int TrustRegionModel::ensureImprovement() {
+
   bool model_complete = isComplete();
   bool model_fl = isLambdaPoised();
   bool model_old = isOld();
@@ -580,6 +599,8 @@ int TrustRegionModel::ensureImprovement() {
   if (!model_complete && (!model_old || !model_fl)) {
     //!<Calculate a new point to add>
     success = improveModelNfp(); //!<improve model>
+    exit_flag = success; // added by MB
+
     if (success) {
       exit_flag = 1;
     }
@@ -596,6 +617,8 @@ int TrustRegionModel::ensureImprovement() {
       if (!model_complete) {
         //!<Improve model>
         success = improveModelNfp();
+        exit_flag = success; // added by MB
+
       } else {
         //!<Replace point>
         success = chooseAndReplacePoint();
