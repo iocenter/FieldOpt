@@ -521,16 +521,17 @@ bool TrustRegionModel::improveModelNfp() {
               Eigen::MatrixXd new_point_abs = unshift_point(new_point_shifted);
               new_fvalues.resize(new_point_abs.cols());
 
-              needs_improvement_ = true;
-              for (int ii = 0; ii < new_point_abs.cols(); ii++) {
-                Case *new_case = new Case(base_case_);
-                new_case->SetRealVarValues(new_point_abs.col(ii));
-                addImprovementCase(new_case);
+              if(!areImprovementPointsComputed()) {
+                  setIsImprovementNeeded(true);
+                  for (int ii = 0; ii < new_point_abs.cols(); ii++) {
+                      Case *new_case = new Case(base_case_);
+                      new_case->SetRealVarValues(new_point_abs.col(ii));
+                      addImprovementCase(new_case);
+                  }
+                  return 5;
+              } else {
+                  std::tie(new_fvalues, f_succeeded) = evaluateNewFvalues(new_point_abs);
               }
-
-              return 5;
-
-//              std::tie(new_fvalues, f_succeeded) = evaluateNewFvalues(new_point_abs);
 
               if (f_succeeded) {
                 break;

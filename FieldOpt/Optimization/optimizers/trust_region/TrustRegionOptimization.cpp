@@ -86,7 +86,7 @@ void TrustRegionOptimization::iterate() {
             tr_model_->moveToBestPoint();
             tr_model_->computePolynomialModels();
 
-            // Poor model condition -> Try to improve model
+            // Poor model condition -> Start improvement model process
             if (tr_model_->hasOnlyOnePoint()) {
 
                 tr_model_->ensureImprovement();
@@ -100,7 +100,7 @@ void TrustRegionOptimization::iterate() {
             return;
         }
 
-        //
+        // Continue improvement model process
         if (tr_model_->isImprovementNeeded()
             && tr_model_->areImprovementPointsComputed()
             && !tr_model_->isInitialized()) {
