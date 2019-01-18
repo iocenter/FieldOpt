@@ -93,8 +93,10 @@ void TrustRegionOptimization::iterate() {
                 auto improvement_cases = tr_model_->getImprovementCases();
 
                 if(tr_model_->isImprovementNeeded()
-                && improvement_cases.size() == 0) {
+                && !improvement_cases.size() == 0) {
                     case_handler_->AddNewCases(improvement_cases);
+                } else if (improvement_cases.size() == 0) {
+                  // # of improvement cases zero!
                 }
             }
             return;
