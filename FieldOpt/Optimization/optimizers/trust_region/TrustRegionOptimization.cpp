@@ -37,8 +37,6 @@ TrustRegionOptimization::TrustRegionOptimization(
         Constraints::ConstraintHandler *constraint_handler
 ) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
 
-    case_handler_ = case_handler;
-
     settings_ = settings;
     variables_ = variables;
     base_case_ = base_case;
@@ -61,6 +59,7 @@ TrustRegionOptimization::TrustRegionOptimization(
     // 1st & 2nd points to initialization_cases_ list
     computeInitialPoints();
 
+    // Log configuration
     if (enable_logging_) {
         logger_->AddEntry(new ConfigurationSummary(this));
     }
@@ -113,7 +112,6 @@ void TrustRegionOptimization::iterate() {
 
         // TRMmodel fully initialized
     } else {
-
 
         // do normal iteration stuff; add cases to queue
         iteration_++;
@@ -168,9 +166,6 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
     } else { // Initialization is done; handling "normal" case
         // do normal stuff
     }
-
-
-
 }
 
 //void TrustRegionOptimization::iterate() {
@@ -265,8 +260,6 @@ void TrustRegionOptimization::computeInitialPoints() {
     }
 }
 
-
-
 void TrustRegionOptimization::setLowerUpperBounds() {
 
   if (constraint_handler_->HasBoundaryConstraints()) {
@@ -304,13 +297,14 @@ Optimization::Optimizer::TerminationCondition
 TrustRegionOptimization::IsFinished() {
 
     TerminationCondition tc = NOT_FINISHED;
-  if (case_handler_->CasesBeingEvaluated().size() > 0) {
+    if (case_handler_->CasesBeingEvaluated().size() > 0) {
         return tc;
-  }
+    }
 
-  if (evaluated_cases_ > max_evaluations_) {
-        tc = MAX_EVALS_REACHED;
-  }
+    if (evaluated_cases_ > max_evaluations_) {
+          tc = MAX_EVALS_REACHED;
+    }
+
     if (tc != NOT_FINISHED) {
         if (enable_logging_) {
             logger_->AddEntry(this);
