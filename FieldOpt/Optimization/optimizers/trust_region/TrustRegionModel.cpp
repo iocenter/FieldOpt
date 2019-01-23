@@ -530,7 +530,7 @@ bool TrustRegionModel::improveModelNfp() {
                   }
                   return 5;
               } else {
-                  std::tie(new_fvalues, f_succeeded) = evaluateNewFvalues(new_point_abs);
+//                  std::tie(new_fvalues, f_succeeded) = evaluateNewFvalues(new_point_abs);
               }
 
               if (f_succeeded) {
@@ -696,32 +696,32 @@ void TrustRegionModel::computePolynomialModels() {
   modeling_polynomials_ = polynomials;
 }
 
-std::tuple<Eigen::RowVectorXd, bool>
-        TrustRegionModel::evaluateNewFvalues(Eigen::MatrixXd new_points_abs) {
-
-    Eigen::RowVectorXd fvalues(new_points_abs.cols());
-    bool simulation_success;
-
-    for (int i=0; i<new_points_abs.cols(); i++) {
-        auto new_case = base_case_;
-        new_case->SetRealVarValues(new_points_abs.col(i));
-//        case_handler_->AddNewCase(new_case);
-//        case_handler_->GetNextCaseForEvaluation();
-        model_->ApplyCase(new_case);
-
-        simulation_success = simulator_->Evaluate(1000000,1);
-
-        if (simulation_success) {
-           model_->wellCost(settings_);
-           new_case->set_objective_function_value(objective_function_->value());
-           new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
-        }
-
-        fvalues(i) = new_case->objective_function_value();
- }
-
- return std::make_tuple(fvalues, simulation_success);
-}
+//std::tuple<Eigen::RowVectorXd, bool>
+//        TrustRegionModel::evaluateNewFvalues(Eigen::MatrixXd new_points_abs) {
+//
+//    Eigen::RowVectorXd fvalues(new_points_abs.cols());
+//    bool simulation_success;
+//
+//    for (int i=0; i<new_points_abs.cols(); i++) {
+//        auto new_case = base_case_;
+//        new_case->SetRealVarValues(new_points_abs.col(i));
+////        case_handler_->AddNewCase(new_case);
+////        case_handler_->GetNextCaseForEvaluation();
+//        model_->ApplyCase(new_case);
+//
+//        simulation_success = simulator_->Evaluate(1000000,1);
+//
+//        if (simulation_success) {
+//           model_->wellCost(settings_);
+//           new_case->set_objective_function_value(objective_function_->value());
+//           new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
+//        }
+//
+//        fvalues(i) = new_case->objective_function_value();
+// }
+//
+// return std::make_tuple(fvalues, simulation_success);
+//}
 
 void TrustRegionModel::shiftPolynomialToEndBlock(
     int point_index,
