@@ -39,13 +39,9 @@
 //    class Simulator;
 //}
 
-namespace Simulation {
-    class Simulator;
-}
-
 //#include "Simulation/simulator_interfaces/simulator.h"
 
-#include "Optimization/objective/objective.h"
+//#include "Optimization/objective/objective.h"
 //#include "Optimization/objective/NPV.h"
 
 class Logger;
