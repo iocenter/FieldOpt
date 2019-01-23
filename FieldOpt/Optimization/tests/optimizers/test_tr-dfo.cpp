@@ -128,8 +128,8 @@ namespace {
 
                 // TEST PIVOT VALUES (VECTOR) ARE EQUAL
                 TestResources::CheckSameVector(
-                        tr_dfo_->getTrustRegionModel()->getPivotValues(),
-                        prob.vm.col(0), tol, "Check pivot values are equal");
+                        tr_dfo_->getTrustRegionModel()->getPivotValues().transpose(),
+                        prob.vm.col(0), tol, "Check pivot values are equal", true);
 
                 // TEST POLYNOMIAL VALUES (COLUMN MATRIX) ARE EQUAL
                 TestResources::CheckSamePolynomials(

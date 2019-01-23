@@ -42,12 +42,19 @@ namespace TestResources {
   }
 
   void CheckSameVector(VectorXd xa, VectorXd xb,
-                  double tol, std::string msg) {
+                  double tol, std::string msg, bool dbg=false) {
+
+    stringstream ss; ss << "[          ] " << FMAGENTA;
+
+    if(dbg) {
+        cout << ss.str() << msg.c_str() << END << endl;
+        cout << ss.str() << "xa: [" << xa.transpose() << "]" << END << endl;
+        cout << ss.str() << "xb: [" << xb.transpose() << "]" << END << endl;
+    }
 
     ASSERT_TRUE(xa.isApprox(xb,tol));
 
     if( ~msg.empty() ) {
-      stringstream ss; ss << "[          ] " << FMAGENTA;
       cout << ss.str() << msg.c_str() << " -> ok" << END << endl;
     }
   }
@@ -60,9 +67,9 @@ namespace TestResources {
     for (int ii=0; ii<xb.rows(); ii++) {
       xbr.row(ii) << xb(idx[ii]);
     }
+    // cout << "xbr: [" << xbr.transpose() << "]" << endl; // FO tr model data (reordered)
     // cout << "xa: [" << xa.transpose() << "]" << endl; // Matlab tr model data
     // cout << "xb: [" << xb.transpose() << "]" << endl; // FO tr model data
-    // cout << "xbr: [" << xbr.transpose() << "]" << endl; // FO tr model data (reordered)
 
     ASSERT_TRUE(xa.isApprox(xbr,tol));
 
