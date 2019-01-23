@@ -73,7 +73,7 @@ namespace {
             for (int i=0; i <prob.idx.size(); i++) {
                 ordered_vec(i) = vec(prob.idx[i]);
             }
-//            test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
+            test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
 
             // Use initial point from Matlab data
             test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
@@ -101,7 +101,8 @@ namespace {
                     tr_dfo_->GetTentativeBestCase()->GetRealVarVector(),
                     prob.xm.col(0), tol, "Check 1st point equal");
 
-            while (!tr_dfo_->IsFinished()) {
+            while (tr_dfo_->IsFinished()
+            == Optimization::Optimizer::TerminationCondition::NOT_FINISHED) {
 
                 // RUNNER CALL (START)
                 auto next_case = tr_dfo_->GetCaseForEvaluation();
