@@ -22,15 +22,11 @@
 #ifndef FIELDOPT_TRUSTREGIONMODEL_H
 #define FIELDOPT_TRUSTREGIONMODEL_H
 
+#include <Optimization/case.h>
 #include <Settings/optimizer.h>
+
 #include <Eigen/Core>
 #include <Eigen/Dense>
-
-#include "Model/model.h"
-#include "Simulation/simulator_interfaces/simulator.h"
-
-#include "Optimization/objective/objective.h"
-#include "Optimization/objective/NPV.h"
 
 #include <vector>
 #include <tuple>
@@ -78,7 +74,7 @@ class TrustRegionModel {
 
     std::vector<Polynomial> getModelingPolynomials() { return modeling_polynomials_ ;}
     RowVectorXd getPivotValues() { return pivot_values_;}
-    
+
     /*!
    * @brief changes TR center pointer to best point
    * considering lower and upper bounds on variables.
@@ -86,6 +82,21 @@ class TrustRegionModel {
     void moveToBestPoint();
 
     void criticalityStep();
+
+    /*!
+    * @brief gives the gradient of the model, calculated
+    * in absolute coordinates in the current point.
+    *
+    * CG comment 1: In this work, the polynomial model is scaled
+    * inside a ball of radius 1. Therefore, it has to be rescaled
+    * to absolute coordinates.
+    *
+    * CG comment 2: Other criticality measures need to be considered
+    * if constraint handling
+    */
+    void measureCriticality();
+
+    void getModelMatrices();
 
     double checkInterpolation();
 
@@ -132,7 +143,7 @@ class TrustRegionModel {
    * @return map in which the first element is a RowVectorXd with the new function values,
    * and the second element is a boolean indicating whether the function evaluations succeeded.
    */
-    std::tuple<Eigen::RowVectorXd, bool> evaluateNewFvalues(Eigen::MatrixXd new_points_abs);
+//    std::tuple<Eigen::RowVectorXd, bool> evaluateNewFvalues(Eigen::MatrixXd new_points_abs);
 
 
     // Model methods
