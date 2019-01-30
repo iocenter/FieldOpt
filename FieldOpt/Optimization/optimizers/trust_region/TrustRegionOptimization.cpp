@@ -47,7 +47,7 @@ TrustRegionOptimization::TrustRegionOptimization(
         logger_->AddEntry(this);
     }
 
-    n_initial_points_ = 0; // may be deleted?
+    n_initial_points_ = 1;
 
     // Construct shell of TRModel, does not initialize
     // model, i.e., is_model_initialized_ = false
@@ -69,24 +69,24 @@ void TrustRegionOptimization::iterate() {
 
     if (iteration_ == 0) {
 
-        // Init points not computed -> Compute them
         if (!tr_model_->areInitPointsComputed() && !tr_model_->isInitialized()) {
+            cout << "Submit Case List to case_handler" << endl;
             auto init_cases = tr_model_->getInitializationCases();
             case_handler_->AddNewCases(init_cases);
             return;
         }
 
-        // Init points are now computed -> Try to initialize TRModel
         if (tr_model_->areInitPointsComputed()
             && !tr_model_->areImprovementPointsComputed()
             && !tr_model_->isInitialized()) {
+            cout << "Initializing TRModel" << endl;
 
             tr_model_->setModelChanged(tr_model_->rebuildModel());
             tr_model_->moveToBestPoint();
             tr_model_->computePolynomialModels();
 
-            // Poor model condition -> Start improvement model process
             if (tr_model_->hasOnlyOnePoint()) {
+                cout << "Improving TRModel" << endl;
 
                 tr_model_->ensureImprovement();
                 auto improvement_cases = tr_model_->getImprovementCases();
@@ -208,6 +208,7 @@ void TrustRegionOptimization::computeInitialPoints() {
     int n_cont_vars = variables_->ContinousVariableSize();
     auto initial_point = base_case_->GetRealVarVector();
 
+    cout << "Adding base case to Case List" << endl;
     tr_model_->addInitializationCase(base_case_);
 
     //!<Find another point since only one initial guess provided
@@ -244,12 +245,14 @@ void TrustRegionOptimization::computeInitialPoints() {
             //!<Establish initial feval matrix>
             initial_fvalues_.setZero(2);
             initial_fvalues_(0) = base_case_->objective_function_value();
-            n_initial_points_++;
 
             //!<Append case corresponding to 2nd init point>
             Case *second_case = new Case(base_case_);
             second_case->SetRealVarValues(second_point);
             tr_model_->addInitializationCase(second_case);
+            cout << "Adding 2nd point to Case List" << endl;
+
+            n_initial_points_++;
 
         } else {
             //TODO: implement other sampling method such as Uniform.

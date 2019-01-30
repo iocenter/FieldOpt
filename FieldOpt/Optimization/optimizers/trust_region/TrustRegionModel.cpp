@@ -247,7 +247,10 @@ bool TrustRegionModel::rebuildModel() {
 
   //!<All points we know>
   all_points_.resize(points_abs_.rows(),
-          points_abs_.cols() + cached_points_.cols());
+                     points_abs_.cols() + cached_points_.cols());
+
+  cout << "all_points_" << all_points_ << endl;
+  cout << "points_abs_" << points_abs_ << endl;
 
   if (cached_points_.size() == 0) {
     all_points_ = points_abs_;
@@ -674,6 +677,9 @@ void TrustRegionModel::computePolynomialModels() {
 
   int dim = (int)points_abs_.rows();
   int points_num = (int)points_abs_.cols();
+
+  cout << points_abs_;
+
   int functions_num = 1; //!<Code currently supports only 1 function>
   int linear_terms = dim+1;
   int full_q_terms = (dim+1)*(dim+2)/2;

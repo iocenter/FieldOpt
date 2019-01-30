@@ -93,48 +93,59 @@ namespace {
 
             stringstream ss; ss << "[          ] " << FMAGENTA;
             double tol = 1e-06;
-            int p_count = 1;
+            int p_count = 0;
 
             // Tentative best case should be equal to base case at this point
-            TestResources::PrintCaseData(*tr_dfo_->GetTentativeBestCase(), *tr_dfo_);
-            TestResources::CheckSameVector(
-                    tr_dfo_->GetTentativeBestCase()->GetRealVarVector(),
-                    prob.xm.col(0), tol, "Check 1st point equal");
+//            TestResources::PrintCaseData(*tr_dfo_->GetTentativeBestCase(), *tr_dfo_);
+//            TestResources::CheckSameVector(
+//                    tr_dfo_->GetTentativeBestCase()->GetRealVarVector(),
+//                    prob.xm.col(0), tol, "Check 1st point equal");
+
+            // # of init points is already 2 here
 
             while (tr_dfo_->IsFinished()
             == Optimization::Optimizer::TerminationCondition::NOT_FINISHED) {
 
                 // RUNNER CALL (START)
                 auto next_case = tr_dfo_->GetCaseForEvaluation();
+                // calls iterate() if case_handler=0
 
                 // COMPUTE OBJ.FUNCTION VALUE FOR CASE
                 next_case->set_objective_function_value(
                         tr_dfo_prob(next_case->GetRealVarVector()));
 
-                if (tr_dfo_->GetNumInitPoints() == 1) {
+                if (p_count == 1) {
                     TestResources::OverrideSecondPoint(prob, *next_case);
                 }
 
                 // RUNNER CALL (FINISH)
                 tr_dfo_->SubmitEvaluatedCase(next_case);
-
+                
                 // PRINT CASE DATA (ID, X, F)
                 TestResources::PrintCaseData(*next_case, *tr_dfo_);
 
                 // TEST IF CURRENT POINT IS EQUAL TO MATLAB DATA
-                TestResources::CheckSameVector(
-                        next_case->GetRealVarVector(),
-                        prob.xm.col(p_count), tol, "Check 2nd is point equal");
+                if (p_count <= 2) {
 
-                // TEST PIVOT VALUES (VECTOR) ARE EQUAL
-                TestResources::CheckSameVector(
-                        tr_dfo_->getTrustRegionModel()->getPivotValues().transpose(),
-                        prob.vm.col(0), tol, "Check pivot values are equal", true);
+                    string msg = "Checking point " + to_string(p_count+1) + " is equal";
+                    TestResources::CheckSameVector(
+                            next_case->GetRealVarVector(),
+                            prob.xm.col(p_count), tol, msg);
+                }
 
-                // TEST POLYNOMIAL VALUES (COLUMN MATRIX) ARE EQUAL
-                TestResources::CheckSamePolynomials(
-                        tr_dfo_->getTrustRegionModel()->getPivotPolynomials(),
-                        prob.pcm, tol, "Check pivot coeff. vector #");
+                if (tr_dfo_->getTrustRegionModel()->isInitialized()) {
+
+                    // TEST PIVOT VALUES (VECTOR) ARE EQUAL
+                    TestResources::CheckSameVector(
+                            tr_dfo_->getTrustRegionModel()->getPivotValues().transpose(),
+                            prob.vm.col(0), tol, "Check pivot values are equal", true);
+
+                    // TEST POLYNOMIAL VALUES (COLUMN MATRIX) ARE EQUAL
+                    TestResources::CheckSamePolynomials(
+                            tr_dfo_->getTrustRegionModel()->getPivotPolynomials(),
+                            prob.pcm, tol, "Check pivot coeff. vector #");
+
+                }
 
                 p_count++;
 

@@ -61,24 +61,24 @@ add_compile_options(-std=c++11)
 if (BUILD_TESTING)
 	# Unit tests
 	add_executable(test_optimization
-			tests/test_case.cpp
-			tests/test_case_handler.cpp
-			tests/constraints/test_bhp_constraint.cpp
-			tests/constraints/test_constraint_handler.cpp
-			tests/constraints/test_reservoir_boundary.cpp
-			tests/objective/test_weightedsum.cpp
-			tests/optimizers/test_compass_search.cpp
-			tests/test_resource_cases.h
-			tests/test_resource_optimizer.h
-			tests/constraints/test_rate_constraint.cpp
-			tests/test_case_transfer_object.cpp
-            tests/optimizers/test_apps.cpp
-            tests/optimizers/test_ga.cpp
-			tests/test_normalizer.cpp
-            tests/constraints/test_interwell_distance.cpp
-            tests/constraints/test_spline_well_length.cpp
-			tests/optimizers/test_ego.cpp
-            tests/constraints/test_pseudo_cont_boundary_2d.cpp
+#			tests/test_case.cpp
+#			tests/test_case_handler.cpp
+#			tests/constraints/test_bhp_constraint.cpp
+#			tests/constraints/test_constraint_handler.cpp
+#			tests/constraints/test_reservoir_boundary.cpp
+#			tests/objective/test_weightedsum.cpp
+#			tests/optimizers/test_compass_search.cpp
+#			tests/test_resource_cases.h
+#			tests/test_resource_optimizer.h
+#			tests/constraints/test_rate_constraint.cpp
+#			tests/test_case_transfer_object.cpp
+#            tests/optimizers/test_apps.cpp
+#            tests/optimizers/test_ga.cpp
+#			tests/test_normalizer.cpp
+#            tests/constraints/test_interwell_distance.cpp
+#            tests/constraints/test_spline_well_length.cpp
+#			tests/optimizers/test_ego.cpp
+#            tests/constraints/test_pseudo_cont_boundary_2d.cpp
 			tests/optimizers/test_tr-dfo.cpp
 			tests/optimizers/test_tr-model-data.hpp
 			tests/optimizers/test_tr-support.hpp)

@@ -144,7 +144,7 @@ namespace TestResources {
     }
     prob.idx = idx1; // <- set to function param
 
-    // dbg
+   // dbg
    // cout << "idx1: [ ";
    // for (int ii=0; ii<idx1.size(); ii++) { cout << idx1[ii] << " "; }
    // cout << "]" << endl;
