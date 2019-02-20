@@ -56,8 +56,8 @@ class TrustRegionModel {
    * @brief Initialize the trust region model.
    */
     TrustRegionModel(
-            const Matrix<double,Dynamic,Dynamic>& initial_points,
-            const RowVectorXd& initial_fvalues,
+//            const Matrix<double,Dynamic,Dynamic>& initial_points,
+//            const RowVectorXd& initial_fvalues,
             VectorXd& lb,
             VectorXd& ub,
             Settings::Optimizer *settings
@@ -145,6 +145,8 @@ class TrustRegionModel {
    */
 //    std::tuple<Eigen::RowVectorXd, bool> evaluateNewFvalues(Eigen::MatrixXd new_points_abs);
 
+    void setDim(int dim) { dim_ = dim; };
+    int getDim() { return dim_; };
 
     // Model methods
     bool isInitialized() const { return is_initialized_; };
@@ -156,7 +158,7 @@ class TrustRegionModel {
     bool areInitPointsComputed() const { return init_points_computed_; };
     void addInitializationCase(Case *c) { initialization_cases_.append(c); };
     void addTempInitCase(Case *c) { temp_init_cases_.append(c); };
-    void submitTempInitCases() { initialization_cases_ = temp_init_cases_; };
+    void submitTempInitCases();
     void setAreInitPointsComputed(bool s) { init_points_computed_ = s; };
 
     // Improvement cases
@@ -188,7 +190,7 @@ class TrustRegionModel {
     */
     void submitInitializationCases(QList<Case *>);
 
- private:
+    private:
     Settings::Optimizer *settings_;
     std::vector<Polynomial> pivot_polynomials_;
     std::vector<Polynomial> modeling_polynomials_;

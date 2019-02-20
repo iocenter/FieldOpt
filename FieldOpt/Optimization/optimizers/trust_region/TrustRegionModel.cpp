@@ -50,8 +50,8 @@ bool compare(
 }
 
 TrustRegionModel::TrustRegionModel(
-    const Matrix<double,Dynamic,Dynamic>& initial_points,
-    const RowVectorXd& initial_fvalues,
+//    const Matrix<double,Dynamic,Dynamic>& initial_points,
+//    const RowVectorXd& initial_fvalues,
     VectorXd& lb,
     VectorXd& ub,
     Settings::Optimizer *settings) {
@@ -67,14 +67,13 @@ TrustRegionModel::TrustRegionModel(
     settings_ = settings;
     radius_ = settings_->parameters().tr_initial_radius;
     tr_center_ = 0;
-    dim_ = (int)initial_points.rows();
     cache_max_ = (int)3*pow(dim_,2);
 
-    points_abs_.setZero(initial_points.rows(), initial_points.cols());
-    points_abs_ << initial_points;
-
-    fvalues_.setZero(initial_fvalues.size());
-    fvalues_ << initial_fvalues;
+//    points_abs_.setZero(initial_points.rows(), initial_points.cols());
+//    points_abs_ << initial_points;
+//
+//    fvalues_.setZero(initial_fvalues.size());
+//    fvalues_ << initial_fvalues;
 
     pivot_values_.resize(0);
     cached_fvalues_.resize(0);
@@ -240,6 +239,22 @@ double TrustRegionModel::checkInterpolation() {
 
 }
 
+void TrustRegionModel::submitTempInitCases() {
+  initialization_cases_ = temp_init_cases_;
+
+  int nvars = initialization_cases_[0]->GetRealVarVector().size();
+  points_abs_.setZero(nvars, initialization_cases_.size());
+  fvalues_.setZero(initialization_cases_.size());
+
+  int ii = 0;
+  for (Case *c : initialization_cases_) {
+    points_abs_.col(ii) = c->GetRealVarVector();
+    fvalues_(ii) = c->objective_function_value();
+    ii++;
+  }
+
+};
+
 bool TrustRegionModel::rebuildModel() {
 
   double pivot_threshold =
@@ -249,9 +264,6 @@ bool TrustRegionModel::rebuildModel() {
   all_points_.resize(points_abs_.rows(),
                      points_abs_.cols() + cached_points_.cols());
 
-  cout << "all_points_" << all_points_ << endl;
-  cout << "points_abs_" << points_abs_ << endl;
-
   if (cached_points_.size() == 0) {
     all_points_ = points_abs_;
   } else {
@@ -260,7 +272,7 @@ bool TrustRegionModel::rebuildModel() {
   }
 
   //!<All function values we know>
-    all_fvalues_.resize(fvalues_.size() + cached_fvalues_.size());
+  all_fvalues_.resize(fvalues_.size() + cached_fvalues_.size());
 
   if (cached_fvalues_.size() == 0) {
     all_fvalues_ = fvalues_;
@@ -268,6 +280,10 @@ bool TrustRegionModel::rebuildModel() {
     all_fvalues_ << fvalues_;
     all_fvalues_ << cached_fvalues_;
   }
+
+  cout << "all_points_" << all_points_ << endl;
+  cout << "points_abs_" << points_abs_ << endl;
+  cout << "all_fvalues_" << all_fvalues_ << endl;
 
   int dim = all_points_.rows();
   int n_points = all_points_.cols();

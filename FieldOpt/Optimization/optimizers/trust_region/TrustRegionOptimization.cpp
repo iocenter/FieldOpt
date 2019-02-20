@@ -51,12 +51,16 @@ TrustRegionOptimization::TrustRegionOptimization(
 
     // Construct shell of TRModel, does not initialize
     // model, i.e., is_model_initialized_ = false
-    tr_model_ = new TrustRegionModel(initial_points_,
-                                     initial_fvalues_,
+    tr_model_ = new TrustRegionModel(// initial_points_,
+                                     // initial_fvalues_,
                                      lb_, ub_, settings_);
 
-    // Find 2nd point; adds cases corresponding to
-    // 1st & 2nd points to initialization_cases_ list
+    // [1] Find 2nd point; make and add cases corresponding
+    // to 1st & 2nd points to initialization_cases_ list
+    // [2] Fields initial_points_ and initial_fvalues_ are first
+    // established here using fields from base_case (thus, these
+    // need to be removed from constructor above, where they play
+    // no part)
     computeInitialPoints();
 
     // Log configuration
@@ -73,6 +77,7 @@ void TrustRegionOptimization::iterate() {
             cout << "Submit Case List to case_handler" << endl;
             auto init_cases = tr_model_->getInitializationCases();
             case_handler_->AddNewCases(init_cases);
+            cout << "# of cases in case_handler: " << init_cases.size() << endl;
             return;
         }
 
@@ -141,6 +146,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
             if (case_handler_->QueuedCases().size() == 0
                 && case_handler_->CasesBeingEvaluated().size() == 0) {
 
+                    // points_abs_, fvalues_ fields are updated in submitTempInitCases()
                     tr_model_->submitTempInitCases();
                     tr_model_->setAreInitPointsComputed(true);
             }
@@ -205,7 +211,9 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
 
 void TrustRegionOptimization::computeInitialPoints() {
 
-    int n_cont_vars = variables_->ContinousVariableSize();
+    tr_model_->setDim(variables_->ContinousVariableSize());
+    int n_cont_vars = tr_model_->getDim();
+
     auto initial_point = base_case_->GetRealVarVector();
 
     cout << "Adding base case to Case List" << endl;
