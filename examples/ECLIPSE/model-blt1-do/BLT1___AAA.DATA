@@ -1,0 +1,113 @@
+-- ######################### MODEL #########################
+RUNSPEC
+
+NOECHO
+
+TITLE
+BLT1_DO /
+
+DIMENS
+139   48    9 /
+
+OIL
+WATER
+
+START
+1 'SEP' 2016  /
+
+EQLDIMS
+1  1000   10    1   20 /
+
+TABDIMS
+1    1   40   40 /
+
+WELLDIMS
+30    80    2    20 /
+
+UNIFOUT
+UNIFIN
+
+-- ---------------------------------------------------------
+GRID
+NOECHO
+
+INIT
+GRIDFILE
+2 /
+--2 1 /
+
+INCLUDE
+'include/BRUGGE_COORD_ZCORN_RXRYRZ.INC' /
+
+INCLUDE
+'include/BRUGGE_PORO_PERMXYZ.INC' /
+
+INCLUDE
+'include/BRUGGE_NTG.INC' /
+
+INCLUDE
+'include/BRUGGE_CSTM_ACTNUM.INC' /
+
+-- ---------------------------------------------------------
+PROPS
+NOECHO
+
+INCLUDE
+'include/BRUGGE_PROPS_DO.INC' /
+
+RPTPROPS
+NOTHING
+/
+
+-- ---------------------------------------------------------
+SOLUTION
+NOECHO
+
+EQUIL      -- DATA FOR INITIALISING FLUIDS TO POTENTIAL EQUILIBRIUM
+--    DATUM  DATUM   OWC    OWC    GOC    GOC    RSVD   RVVD   SOLN
+--    DEPTH  PRESS  DEPTH   PCOW  DEPTH   PCOG  TABLE  TABLE   METH
+       1518    140   1610      0   1518      0      0      0      0       
+/
+
+-- ---------------------------------------------------------
+SUMMARY
+NOECHO
+
+INCLUDE
+'include/BRUGGE_SUMMARY.INC' /
+
+NOECHO
+
+-- ---------------------------------------------------------
+SCHEDULE
+NOECHO
+
+RPTSCHED
+RESTART=1
+/
+
+RPTRST
+-- Restart file written every report time
+'BASIC=2'
+-- Restart file written every nth report time set by FREQ=n
+--'BASIC=3'
+-- Restart file written first report step of each year
+--'BASIC=4'
+-- Restart file written first report step of each month
+--'BASIC=5'
+-- Restart file written every time step
+--'BASIC=6'
+-- Requests a graphics only Restart file
+'NORST=1'
+/
+
+TUNING
+0.1 30  /
+5*  0.1	/
+2*  100 /
+
+INCLUDE
+'include/schedule.in'
+/
+
+
