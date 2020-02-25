@@ -44,6 +44,7 @@ TrustRegionOptimization::TrustRegionOptimization(
     settings_ = settings;
     variables_ = variables;
     base_case_ = base_case;
+//    cout << BYELLOW << "improve_model_[-1]: " << improve_model_ << AEND << endl;
 
     setLowerUpperBounds();
 
@@ -54,6 +55,7 @@ TrustRegionOptimization::TrustRegionOptimization(
     // Construct shell of TRModel, does not initialize
     // model, i.e., is_model_initialized_ = false
     tr_model_ = new TrustRegionModel(lb_, ub_, base_case_, settings_);
+//    cout << BYELLOW << "improve_model_[0]: " << improve_model_ << AEND << endl;
 
     // [1] Find 2nd point; make and add cases corresponding
     // to 1st & 2nd points to initialization_cases_ list
@@ -75,6 +77,7 @@ TrustRegionOptimization::TrustRegionOptimization(
         logger_->AddEntry(new ConfigurationSummary(this));
     }
 
+//    cout << BYELLOW << "improve_model_[1]: " << improve_model_ << AEND << endl;
     cout << "iter        fval         rho      radius  pts" << endl;
 }
 
@@ -168,10 +171,7 @@ void TrustRegionOptimization::iterate() {
 
       if (improve_model_) {
         mchange_flag_ = tr_model_->ensureImprovement();
-        cout << "updateRadius: postProcessing after handleEvaluatedCase" << endl;
-        cout << "radius before: " << tr_model_->getRadius() << endl;
         improve_model_ = ensureImprovementPostProcessing();
-        cout << "radius after: " << tr_model_->getRadius() << endl;
       }
       
       if ((!tr_model_->isImprovementNeeded() //_if-5
@@ -209,8 +209,9 @@ void TrustRegionOptimization::iterate() {
               return;
             }
           } else {
-	    criticality_step_execution_ongoing_ = false;
-	  }
+	        criticality_step_execution_ongoing_ = false;
+          }
+
           iteration_model_fl_ = tr_model_->isLambdaPoised();
           //!<Print summary>
           printIteration(fval_current);
@@ -228,10 +229,8 @@ void TrustRegionOptimization::iterate() {
             rho_ = -std::numeric_limits<double>::infinity();
             mchange_flag_ = tr_model_->ensureImprovement();
 
-            cout << "updateRadius:  postProcessing small decrease" << endl;
-            cout << "radius before: " << tr_model_->getRadius() << endl;
+            tr_model_->DBG_printPivotPolynomials("TEST");
             improve_model_ = ensureImprovementPostProcessing();
-            cout << "radius after: " << tr_model_->getRadius() << endl;
 
           } else {
             //!<Evaluate objective at trial point>
@@ -270,10 +269,7 @@ void TrustRegionOptimization::iterate() {
           if ((mchange_flag_ ==1) || (mchange_flag_ == 2)) {
             iteration_--;
           }
-	  cout << "Final ensureImprovement" << endl;
-	  cout << "radius before: " << tr_model_->getRadius() << endl;
-	  updateRadius();
-	  cout << "radius after: " << tr_model_->getRadius() << endl;
+          updateRadius();
 
           return;
         } else {
@@ -329,7 +325,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
         } else if (tr_model_->areInitPointsComputed()
                    && !tr_model_->isInitialized()) {
 
-            // Collect initialization case
+            // Collect improvement case
             tr_model_->addTempImprCase(c);
 
             // All improvement cases have been evaluated
@@ -403,6 +399,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
 
             //!<Including this new point as the TR center>
             mchange_flag_ = tr_model_->changeTrCenter(trial_point_, fval_trial_);
+
           } else {
             auto point_added = tr_model_->tryToAddPoint(trial_point_, fval_trial_);
             if (!point_added) {
@@ -413,10 +410,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           sum_rho_sqr_ += pow(rho_, 2);
 
         if (!improve_model_) {
-          cout << "updateRadius: handleEvaluatedCase" << endl;
-          cout << "radius before: " << tr_model_->getRadius() << endl;
           updateRadius();
-          cout << "radius after: " << tr_model_->getRadius() << endl;
         }
       }
     }
@@ -549,6 +543,7 @@ bool TrustRegionOptimization::ensureImprovementPostProcessing(){
   auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
   auto replacement_cases = tr_model_->getReplacementCases(); //<replace point>
 
+//  cout << "criticality_step_execution_ongoing_A: " << criticality_step_execution_ongoing_ << endl;
   if (tr_model_->isImprovementNeeded() && !improvement_cases.size() == 0) {
     case_handler_->AddNewCases(improvement_cases);
     return true;

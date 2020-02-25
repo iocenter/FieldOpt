@@ -71,10 +71,10 @@ class TrustRegionModel {
 
     void DBG_printPivotPolynomials(string msg);
 
-    inline string OSD(double argout, string fstr="f") {
+    inline string DBG_printDouble(double argout, string frmt="% 10.3e ") {
       stringstream ss;
       char buffer [100];
-      sprintf(buffer, "% 10.3e ", argout);
+      sprintf(buffer, frmt.c_str(), argout);
       ss << buffer;
       return ss.str();
     }

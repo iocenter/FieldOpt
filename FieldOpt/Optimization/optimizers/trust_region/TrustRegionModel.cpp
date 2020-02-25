@@ -304,7 +304,7 @@ void TrustRegionModel::clearReplacementCasesList() {
 
 bool TrustRegionModel::rebuildModel() {
 
-  checkDataSize("Starting rebuildModel");
+//  checkDataSize("Starting rebuildModel");
   //!<All points we know>
   all_points_.conservativeResize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
   if (cached_points_.size() == 0) {
@@ -372,6 +372,7 @@ bool TrustRegionModel::rebuildModel() {
     // cout << "pointsshifted cols " << points_shifted_.cols() << endl;
     sortVectorByIndex(all_fvalues_, index_vector_);
 
+  DBG_printPivotPolynomials("rebuildModel");
   nfpBasis(dim);//!<build nfp polynomial basis>
 
   //!<Starting rowPivotGaussianElimination>
@@ -510,9 +511,9 @@ bool TrustRegionModel::rebuildModel() {
   all_points_.conservativeResize(0, 0);
   all_fvalues_.conservativeResize(0);
 
-  checkDataSize("End of rebuildModel");
+//  checkDataSize("End of rebuildModel");
   
-  return last_pt_included < n_points; //!<model has changed>
+  return last_pt_included < n_points;
 }
 
 bool TrustRegionModel::improveModelNfp() {
@@ -535,8 +536,9 @@ bool TrustRegionModel::improveModelNfp() {
   f_succeeded.fill(false);
 
   int poly_i;
-  double new_pivot_value;
+  double new_pivot_value; // = 0.0; // ******!!!!!!
 
+  DBG_printPivotPolynomials("improveModelNfp");
   auto pivot_polynomials = pivot_polynomials_;
   auto polynomials_num = pivot_polynomials.size();
 
@@ -742,12 +744,12 @@ int TrustRegionModel::ensureImprovement() {
 
   if (!model_complete && (!model_old || !model_fl)) {
     //!<Calculate a new point to add>
-    checkDataSize("Before improveModelNfp");
+    checkDataSize("Before improveModelNfp"); // dbg
     success = improveModelNfp(); //!<improve model>
-    if (!checkDataSize("After improveModelNfp")){
+    if (!checkDataSize("After improveModelNfp")){ // dbg
       cerr << "success: " << success << endl;
       cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
-    }
+    } // checkDataSize
       
 
     if ((success) || (!success && improvement_cases_.size() > 0)) {
@@ -755,35 +757,35 @@ int TrustRegionModel::ensureImprovement() {
     }
   } else if ((model_complete) && (!model_old)){
     //!<Replace some point with a new one that improves geometry>
-    checkDataSize("Before chooseAndReplacePoint");
+    checkDataSize("Before chooseAndReplacePoint"); // dbg
     success = chooseAndReplacePoint(); //!<replace point>
-    if (!checkDataSize("After chooseAndReplacePoint")){
+    if (!checkDataSize("After chooseAndReplacePoint")){ // dbg
       cerr << "success: " << success << endl;
       cerr << "replacement_cases size: " << replacement_cases_.size() << endl;
-    }
+    } // dbg
     if ((success) || (!success && replacement_cases_.size() > 0))  {
       exit_flag = 2;
     }
   }
   if ((!success) && (improvement_cases_.size() == 0) && (replacement_cases_.size() == 0)) {
-    checkDataSize("Before rebuildModel");
+    checkDataSize("Before rebuildModel"); // dbg
     bool model_changed = rebuildModel();
-    checkDataSize("After rebuildModel");
+    checkDataSize("After rebuildModel"); // dbg
     if (!model_changed) {
       if (!model_complete) {
         //!<Improve model>
-	checkDataSize("Before improveModelNfp second");
+	      checkDataSize("Before improveModelNfp second"); // dbg
         success = improveModelNfp();
-	if (!checkDataSize("After improveModelNfp second")){
-	  cerr << "success: " << success << endl;
-	  cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
-	}
+        if (!checkDataSize("After improveModelNfp second")){ // dbg
+          cerr << "success: " << success << endl;
+          cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
+        } // dbg
 
-      } else {
+        } else {
         //!<Replace point>
-	checkDataSize("Before chooseandreplace");
+	      checkDataSize("Before chooseandreplace"); // dbg
         success = chooseAndReplacePoint();
-	checkDataSize("After chooseandreplace");
+        checkDataSize("After chooseandreplace"); // dbg
       }
     } else {
       success = true;
@@ -1164,6 +1166,7 @@ void TrustRegionModel::computePolynomialModels() {
   int linear_terms = dim+1;
   int full_q_terms = (dim+1)*(dim+2)/2;
   std::vector<Polynomial> polynomials(functions_num);
+  DBG_printPivotPolynomials("computePolynomialModels");
 
   if ((linear_terms < points_num) && (points_num < full_q_terms)) {
     //!<Compute quadratic model>
@@ -1548,6 +1551,8 @@ TrustRegionModel::computeQuadraticMNPolynomials() {
 
     polynomials[n] = matricesToPolynomial(c, g, H);
   }
+
+  DBG_printPivotPolynomials("computeQuadraticMNPolynomials");
   return polynomials;
 }
 
@@ -1555,8 +1560,10 @@ RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
   //!<Change so we can interpolate more functions at the same time>
   int dim = (int)points_shifted_.rows();
   RowVectorXd l_alpha = fvalues_;
-    std::vector<Polynomial> polynomials =
-            std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
+  DBG_printPivotPolynomials("nfpFiniteDifferences");
+
+  std::vector<Polynomial> polynomials =
+          std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
 
   //!<Remove constant polynomial>
   for (int m = 1; m < points_num; m++) {
@@ -1577,19 +1584,19 @@ RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
 
 void TrustRegionModel::DBG_printPivotPolynomials(string msg=""){
   string ENDSTRN = string(100, '=');
-  cout << BRED << BLDON << FBLACK << ENDSTRN << AEND << endl;
+  cout << BLDON << ENDSTRN << AEND << endl;
   if (msg != "") {
-    cout << BRED << BLDON << FBLACK << "[" << msg << "]" << AEND << endl;
+    cout << BCYAN << BLDON << FRED << "[" << msg << "]" << AEND << endl;
   }
 
-  for (int kk = 1; kk < pivot_polynomials_.size(); kk++) {
+  for (int kk = 0; kk < pivot_polynomials_.size(); kk++) {
     auto vec = pivot_polynomials_[kk].coefficients;
     
     cout << FGREEN << "pivot.polyn#" << kk << "[ ";
     for (int ii = 0; ii < vec.size()-1; ii++) {
-      cout << OSD(vec(ii));
+      cout << DBG_printDouble(vec(ii));
     }
-    cout << OSD(vec.size()-1) << " ]" << AEND <<  endl;
+    cout << DBG_printDouble(vec(vec.size()-1)) << " ]" << AEND <<  endl;
   }  
 }
 
@@ -1599,7 +1606,6 @@ Polynomial TrustRegionModel::combinePolynomials(
 
     DBG_printPivotPolynomials("combinePolynomials");
 
-  // polynomials -> std::vector<Polynomial>
   auto polynomials = std::vector<Polynomial>(
       pivot_polynomials_.begin(),
       pivot_polynomials_.begin() + points_num);
@@ -1616,7 +1622,8 @@ Polynomial TrustRegionModel::combinePolynomials(
 
   auto p = multiplyPolynomial(polynomials[0], coefficients(0));
   for (int k = 1; k < terms; k++) {
-    p = addPolynomial(p, multiplyPolynomial(polynomials[k], coefficients[k]));
+    auto mp = multiplyPolynomial(polynomials[k], coefficients(k));
+    p = addPolynomial(p, mp);
   }
   return p;
 }
@@ -1674,6 +1681,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   auto shift_center = points_abs_.col(0);
   auto tr_center_x = points_shifted_.col(tr_center);
 
+  DBG_printPivotPolynomials("chooseAndReplacePoint");
   auto pivot_values = pivot_values_;
   auto pivot_polynomials = pivot_polynomials_;
 
