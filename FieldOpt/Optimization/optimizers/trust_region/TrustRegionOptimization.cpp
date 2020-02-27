@@ -181,7 +181,10 @@ void TrustRegionOptimization::iterate() {
 
         if ((tr_model_->getRadius() < tol_radius)
             || (iteration_ == iter_max)) {
+
+          tr_model_->DBG_printModelData("Iterate-Y");
           return; //end of the algorithm
+
         } else {
           if (true || tr_model_->isLambdaPoised()) {//<Move among points that are part of the model>
             tr_model_->moveToBestPoint();
@@ -231,6 +234,8 @@ void TrustRegionOptimization::iterate() {
 
             tr_model_->DBG_printPivotPolynomials("TEST");
             improve_model_ = ensureImprovementPostProcessing();
+
+            tr_model_->DBG_printModelData("Iterate-X");
 
           } else {
             //!<Evaluate objective at trial point>
@@ -296,6 +301,9 @@ void TrustRegionOptimization::printIteration(double fval_current) {
      << setw(12) << scientific << right << tr_model_->getRadius()
      << setw(5) << right << tr_model_->getNumPts();
   cout << ss.str() << endl;
+
+  string fn = "dbgPivotPolynomials_" + settings_->parameters().tr_prob_name + ".txt";
+  tr_model_->DBG_printToFile(fn, ss.str() + "\n");
 }
 
 

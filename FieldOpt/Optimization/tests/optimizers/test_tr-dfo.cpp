@@ -99,6 +99,7 @@ namespace {
 
             // Use initial point from Matlab data
             test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
+            settings_tr_opt_max_->setTRProbName(prob.name);
 
             tr_dfo_ = new TrustRegionOptimization(
                     settings_tr_opt_max_,
@@ -122,7 +123,7 @@ namespace {
                 auto next_case = tr_dfo_->GetCaseForEvaluation();
                 while (next_case == nullptr) {
                   if (tr_dfo_->IsFinished()) {
-                    break;
+                  break;
                   } else {
                     next_case = tr_dfo_->GetCaseForEvaluation();
                   }
@@ -188,6 +189,7 @@ namespace {
 	delete (varcont_tr_dfo_probs_);
       }
     };
+
     // TEST_F(TrustRegionTest, trHS1) {
     //     cout << endl << FMAGENTA << "[          ] =============="
     //          << "=========================================== " << endl
@@ -197,6 +199,7 @@ namespace {
     //     SetUpOptimizer(tr_mdata.prob_hs1, hs1);
     //     EXPECT_TRUE(RunnerSubs(tr_mdata.prob_hs1, hs1));
     // }
+
    TEST_F(TrustRegionTest, trDfoProb1) {
        cout << endl << FMAGENTA << "[          ] =============="
             << "=========================================== " << endl

@@ -70,6 +70,10 @@ class TrustRegionModel {
             );
 
     void DBG_printPivotPolynomials(string msg);
+    void DBG_printToFile(string fn, string sout);
+
+    void DBG_printHeader(stringstream &ss, string msg="");
+    void DBG_printModelData(string msg="");
 
     inline string DBG_printDouble(double argout, string frmt="% 10.3e ") {
       stringstream ss;

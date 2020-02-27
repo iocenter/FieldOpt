@@ -105,6 +105,7 @@ class Optimizer
     double tr_criticality_omega = 0.5;
     double tr_lower_bound = -std::numeric_limits<double>::infinity();
     double tr_upper_bound = -std::numeric_limits<double>::infinity();
+    std::string tr_prob_name = "prob0";
 
     int tr_iter_max = 10000;
     int tr_init_guesses = -1; //!< Number of initial guesses provided to build the Trust Region (default is 1)
@@ -197,6 +198,7 @@ class Optimizer
   QList<HybridComponent> HybridComponents() { return hybrid_components_; } // Get the list of hybrid-optimizer components when using the HYBRID type.
   void SetRngSeed(const int seed) { parameters_.rng_seed = seed; } //!< Change the RNG seed (used by HybridOptimizer).
 
+  void setTRProbName(std::string pn) { parameters_.tr_prob_name = pn; }
 
  private:
   QList<Constraint> constraints_;

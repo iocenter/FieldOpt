@@ -721,6 +721,7 @@ bool TrustRegionModel::improveModelNfp() {
         fvalues_.conservativeResize(nr, nc+1);
         fvalues_.col(nc) = nfp_new_fvalues_;
 
+        // warning: ‘new_pivot_value’ may be used uninitialized in this function
         pivot_values_(next_position) = new_pivot_value;
 
         exit_flag = true;
@@ -1157,7 +1158,6 @@ tuple<double, bool> TrustRegionModel::choosePivotPolynomial(int initial_i, int f
   return make_tuple(pivot_value, success);
 }
 
-
 void TrustRegionModel::computePolynomialModels() {
 
   int dim = (int)points_abs_.rows();
@@ -1582,22 +1582,57 @@ RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
   return l_alpha;
 }
 
-void TrustRegionModel::DBG_printPivotPolynomials(string msg=""){
+void TrustRegionModel::DBG_printHeader(stringstream &ss, string msg) {
   string ENDSTRN = string(100, '=');
-  cout << BLDON << ENDSTRN << AEND << endl;
+  ss << ENDSTRN << endl;
+
   if (msg != "") {
-    cout << BCYAN << BLDON << FRED << "[" << msg << "]" << AEND << endl;
+    ss << "[" << msg << "]" << endl;
+  }
+}
+
+void TrustRegionModel::DBG_printModelData(string msg) {
+  stringstream ss;
+  DBG_printHeader(ss, msg);
+
+  ss << "[ points_abs_.cols(): " << DBG_printDouble(getNumPts(), "% 6.0f") << " ]";
+  ss << "[ radius_:            " << DBG_printDouble(getRadius(), "% 10.3e") << " ]";
+  cout << FGREEN << ss.str() << AEND;
+
+  string fn = "dbgPivotPolynomials_" + settings_->parameters().tr_prob_name + ".txt";
+  DBG_printToFile(fn, ss.str());
+}
+
+void TrustRegionModel::DBG_printPivotPolynomials(string msg="") {
+  string ENDSTRN = string(100, '=');
+  stringstream ss;
+
+  ss << ENDSTRN << endl;
+
+  if (msg != "") {
+    ss << "[" << msg << "]" << endl;
   }
 
   for (int kk = 0; kk < pivot_polynomials_.size(); kk++) {
     auto vec = pivot_polynomials_[kk].coefficients;
-    
-    cout << FGREEN << "pivot.polyn#" << kk << "[ ";
+
+    ss << "piv.p# " << kk << "[ ";
     for (int ii = 0; ii < vec.size()-1; ii++) {
-      cout << DBG_printDouble(vec(ii));
+      ss << DBG_printDouble(vec(ii));
     }
-    cout << DBG_printDouble(vec(vec.size()-1)) << " ]" << AEND <<  endl;
-  }  
+    ss << DBG_printDouble(vec(vec.size()-1)) << " ]" << endl;
+  }
+  cout << FGREEN << ss.str() << AEND;
+
+  string fn = "dbgPivotPolynomials_" + settings_->parameters().tr_prob_name + ".txt";
+  DBG_printToFile(fn, ss.str());
+}
+
+void TrustRegionModel::DBG_printToFile(string fn, string sout) {
+  FILE * pFile;
+  pFile = std::fopen(fn.c_str(), "a");
+  std::fprintf(pFile, "%s", sout.c_str());
+  fclose (pFile);
 }
 
 Polynomial TrustRegionModel::combinePolynomials(
