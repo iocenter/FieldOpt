@@ -97,7 +97,7 @@ class TrustRegionOptimization : public Optimizer {
     bool criticality_step_performed_ = false;
     bool improve_model_ = false;
     bool criticality_step_execution_ongoing_ = false;
-    
+
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
     Case *base_case_;

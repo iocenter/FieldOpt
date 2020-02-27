@@ -44,7 +44,6 @@ TrustRegionOptimization::TrustRegionOptimization(
     settings_ = settings;
     variables_ = variables;
     base_case_ = base_case;
-//    cout << BYELLOW << "improve_model_[-1]: " << improve_model_ << AEND << endl;
 
     setLowerUpperBounds();
 
@@ -55,7 +54,6 @@ TrustRegionOptimization::TrustRegionOptimization(
     // Construct shell of TRModel, does not initialize
     // model, i.e., is_model_initialized_ = false
     tr_model_ = new TrustRegionModel(lb_, ub_, base_case_, settings_);
-//    cout << BYELLOW << "improve_model_[0]: " << improve_model_ << AEND << endl;
 
     // [1] Find 2nd point; make and add cases corresponding
     // to 1st & 2nd points to initialization_cases_ list
@@ -77,7 +75,6 @@ TrustRegionOptimization::TrustRegionOptimization(
         logger_->AddEntry(new ConfigurationSummary(this));
     }
 
-//    cout << BYELLOW << "improve_model_[1]: " << improve_model_ << AEND << endl;
     cout << "iter        fval         rho      radius  pts" << endl;
 }
 
@@ -208,11 +205,12 @@ void TrustRegionOptimization::iterate() {
             }
             criticality_step_performed_ = true;
             if (model_criticality.norm() < tol_f) {
+              cout << "HELLO!!!!?????" << endl;
               Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
               return;
             }
           } else {
-	        criticality_step_execution_ongoing_ = false;
+	          criticality_step_execution_ongoing_ = false;
           }
 
           iteration_model_fl_ = tr_model_->isLambdaPoised();
@@ -232,9 +230,7 @@ void TrustRegionOptimization::iterate() {
             rho_ = -std::numeric_limits<double>::infinity();
             mchange_flag_ = tr_model_->ensureImprovement();
 
-            tr_model_->DBG_printPivotPolynomials("TEST");
             improve_model_ = ensureImprovementPostProcessing();
-
             tr_model_->DBG_printModelData("Iterate-X");
 
           } else {
@@ -302,8 +298,7 @@ void TrustRegionOptimization::printIteration(double fval_current) {
      << setw(5) << right << tr_model_->getNumPts();
   cout << ss.str() << endl;
 
-  string fn = "dbgPivotPolynomials_" + settings_->parameters().tr_prob_name + ".txt";
-  tr_model_->DBG_printToFile(fn, ss.str() + "\n");
+  tr_model_->DBG_printToFile(tr_model_->DBG_fn_pivp_, "\n" + ss.str() + "\n");
 }
 
 

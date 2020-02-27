@@ -74,14 +74,49 @@ class TrustRegionModel {
 
     void DBG_printHeader(stringstream &ss, string msg="");
     void DBG_printModelData(string msg="");
+    void DBG_printExchangePoint(string msg="",
+        VectorXd v0 = VectorXd::Zero(0),
+        VectorXd v1 = VectorXd::Zero(0));
 
-    inline string DBG_printDouble(double argout, string frmt="% 10.3e ") {
+  inline string DBG_printDouble(double argout, string frmt="% 10.3e ") {
       stringstream ss;
       char buffer [100];
       sprintf(buffer, frmt.c_str(), argout);
       ss << buffer;
       return ss.str();
     }
+
+    inline string DBG_printVectorXd(VectorXd vec,
+        string mv="", string fv="% 10.3e ", string fn="") {
+
+      stringstream ss;
+      if (mv != "") ss << mv;
+      ss << "[";
+      for (int ii = 0; ii < vec.size()-1; ii++) {
+        ss << DBG_printDouble(vec(ii), fv);
+      }
+      ss << DBG_printDouble(vec(vec.size()-1)) << "]";
+
+      if (fn != "") {
+        DBG_printToFile(fn, ss.str() + "\n");
+      };
+      return ss.str();
+    }
+
+    inline string DBG_printMatrixXd(MatrixXd mat,
+                                    string mm="", string fm="% 10.3e ") {
+
+      stringstream ss;
+      for (int ii = 0; ii < mat.rows(); ii++) {
+        if (mm != "") ss << "\n" << mm << "#" << ii;
+        ss << DBG_printVectorXd(mat.row(ii), mm, fm);
+      }
+      return ss.str();
+    }
+
+    string DBG_fn_pivp_;
+    string DBG_fn_mdat_;
+    string DBG_fn_xchp_;
 
     SNOPTSolver *SNOPTSolver_;
 
