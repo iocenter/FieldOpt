@@ -304,7 +304,7 @@ void TrustRegionModel::clearReplacementCasesList() {
 
 bool TrustRegionModel::rebuildModel() {
 
-//  checkDataSize("Starting rebuildModel");
+  // checkDataSize("Starting rebuildModel");
   //!<All points we know>
   all_points_.conservativeResize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
   if (cached_points_.size() == 0) {
@@ -511,7 +511,7 @@ bool TrustRegionModel::rebuildModel() {
   all_points_.conservativeResize(0, 0);
   all_fvalues_.conservativeResize(0);
 
-//  checkDataSize("End of rebuildModel");
+  // checkDataSize("End of rebuildModel");
   
   return last_pt_included < n_points;
 }
@@ -745,7 +745,7 @@ int TrustRegionModel::ensureImprovement() {
 
   if (!model_complete && (!model_old || !model_fl)) {
     //!<Calculate a new point to add>
-    checkDataSize("Before improveModelNfp"); // dbg
+    // checkDataSize("Before improveModelNfp"); // dbg
     success = improveModelNfp(); //!<improve model>
     if (!checkDataSize("After improveModelNfp")){ // dbg
       cerr << "success: " << success << endl;
@@ -758,7 +758,7 @@ int TrustRegionModel::ensureImprovement() {
     }
   } else if ((model_complete) && (!model_old)){
     //!<Replace some point with a new one that improves geometry>
-    checkDataSize("Before chooseAndReplacePoint"); // dbg
+    // checkDataSize("Before chooseAndReplacePoint"); // dbg
     success = chooseAndReplacePoint(); //!<replace point>
     if (!checkDataSize("After chooseAndReplacePoint")){ // dbg
       cerr << "success: " << success << endl;
