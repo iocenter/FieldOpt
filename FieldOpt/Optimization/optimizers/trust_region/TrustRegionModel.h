@@ -78,11 +78,13 @@ class TrustRegionModel {
         VectorXd v0 = VectorXd::Zero(0),
         VectorXd v1 = VectorXd::Zero(0));
 
-  inline string DBG_printDouble(double argout, string frmt="% 10.3e ") {
+  inline string DBG_printDouble(double argout,
+      string frmt="% 10.3e ", string fn="") {
       stringstream ss;
       char buffer [100];
       sprintf(buffer, frmt.c_str(), argout);
       ss << buffer;
+      if (fn != "") DBG_printToFile(fn, ss.str() + "\n");
       return ss.str();
     }
 
@@ -90,16 +92,18 @@ class TrustRegionModel {
         string mv="", string fv="% 10.3e ", string fn="") {
 
       stringstream ss;
-      if (mv != "") ss << mv;
-      ss << "[";
-      for (int ii = 0; ii < vec.size()-1; ii++) {
-        ss << DBG_printDouble(vec(ii), fv);
+      if ( vec.size() > 0 ) {
+        if (mv != "") ss << mv;
+        ss << "[";
+        for (int ii = 0; ii < vec.size() - 1; ii++) {
+          ss << DBG_printDouble(vec(ii), fv);
+        }
+        ss << DBG_printDouble(vec(vec.size() - 1)) << "]";
+      } else {
+        ss << "[ Empty ]";
       }
-      ss << DBG_printDouble(vec(vec.size()-1)) << "]";
 
-      if (fn != "") {
-        DBG_printToFile(fn, ss.str() + "\n");
-      };
+      if (fn != "") DBG_printToFile(fn, ss.str() + "\n");
       return ss.str();
     }
 

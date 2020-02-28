@@ -493,10 +493,12 @@ bool TrustRegionModel::rebuildModel() {
     }
   }
 
+  DBG_printModelData("rowPivotGaussianElimination-00");
   tr_center_ = 0;
   points_abs_ = all_points_.leftCols(last_pt_included + 1);
-  points_shifted_ = points_shifted_.leftCols(last_pt_included + 1);
+  points_shifted_ = points_shifted_.leftCols(last_pt_included + 1).eval();
   fvalues_ = all_fvalues_.head(last_pt_included + 1);
+  DBG_printModelData("rowPivotGaussianElimination-01");
 
   double cache_size = std::min(double(n_points - last_pt_included - 1), 3 * pow(dim, 2));
   modeling_polynomials_.clear();
@@ -1346,7 +1348,8 @@ Polynomial TrustRegionModel::matricesToPolynomial(
   return p;
 }
 
-std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
+std::tuple<double, VectorXd, MatrixXd>
+    TrustRegionModel::coefficientsToMatrices(
     int dimension,
     VectorXd coefficients) {
 
@@ -1368,7 +1371,7 @@ std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
 
   //!< Order one term>
   int idx_coefficients = dimension;
-  auto g = coefficients.segment(1,idx_coefficients);
+  VectorXd g = coefficients.segment(1,idx_coefficients);
 
   //!< Second order term>
   MatrixXd H(dimension, dimension);
@@ -1447,6 +1450,10 @@ Polynomial TrustRegionModel::zeroAtPoint(
   auto px = evaluatePolynomial(p, x);
   auto p2x = evaluatePolynomial(p2, x);
   int iter = 1;
+
+  VectorXd xd(3); xd << px, p2x, -px/p2x;
+  DBG_printVectorXd(xd, "p-vals: ", "% 10.3e ", DBG_fn_pivp_);
+
   while (px != 0) {
     p = addPolynomial(p, multiplyPolynomial(p2, -px/p2x));
     px = evaluatePolynomial(p, x);
@@ -1467,10 +1474,17 @@ double TrustRegionModel::evaluatePolynomial(
   MatrixXd H(p1.dimension, p1.dimension);
   std::tie(c, g, H) = coefficientsToMatrices(p1.dimension, p1.coefficients);
 
+  VectorXd xv(3); xv << c, g.prod(), H.prod();
+  DBG_printVectorXd(xv, "c -- prod(gx) -- prod(xHx): ", "% 10.3e ", DBG_fn_pivp_);
+
   terms[0] = c;
   terms[1] = g.transpose()*x;
   terms[2] = (x.transpose()*H*x);
   terms[2] *= 0.5;
+
+  DBG_printVectorXd(x, "point x ", "% 10.3e ", DBG_fn_pivp_);
+  VectorXd xt(3); xt << terms[0], terms[1], terms[2];
+  DBG_printVectorXd(xt, "c --    gx    --    xHx:    ", "% 10.3e ", DBG_fn_pivp_);
 
   return terms[0] + terms[1] + terms[2];
 
@@ -1488,8 +1502,8 @@ Polynomial TrustRegionModel::addPolynomial(
                              "They have different dimensions.");
   }
 
-  DBG_printVectorXd(p1.coefficients, "p1: ", "% 10.3e ", DBG_fn_pivp_);
-  DBG_printVectorXd(p2.coefficients, "p2: ", "% 10.3e ", DBG_fn_pivp_);
+  DBG_printVectorXd(p1.coefficients, "add-p1: ", "% 10.3e ", DBG_fn_pivp_);
+  DBG_printVectorXd(p2.coefficients, "add-p2: ", "% 10.3e ", DBG_fn_pivp_);
 
   Polynomial p;
   p.dimension = p1.dimension;
@@ -1510,7 +1524,11 @@ Polynomial TrustRegionModel::multiplyPolynomial(
     Polynomial p1,
     double factor) {
   Polynomial p = p1;
-  p.coefficients = p1.coefficients*factor;
+  DBG_printVectorXd(p.coefficients, "multp0: ", "% 10.3e ", DBG_fn_pivp_);
+
+  p.coefficients = p1.coefficients * factor;
+  DBG_printVectorXd(p.coefficients, "multp1: ", "% 10.3e ", DBG_fn_pivp_);
+
   return p;
 }
 
@@ -1626,13 +1644,15 @@ void TrustRegionModel::DBG_printModelData(string msg) {
   stringstream ss;
   DBG_printHeader(ss, msg);
 
-  ss << "[ points_abs_.cols(): " << DBG_printDouble(getNumPts(), "% 6.0f") << " ]";
-  ss << "[ radius_:            " << DBG_printDouble(getRadius(), "% 10.3e") << " ]";
+  ss << "cached_fvalues_: " << DBG_printVectorXd(cached_fvalues_) << "\n";
+  ss << "cached_points_: "  << DBG_printMatrixXd(cached_points_, " ") << "\n";
+  ss << "fvalues_: "        << DBG_printVectorXd(fvalues_) << "\n";
 
-  ss << "[ radius_:            " << DBG_printDouble(getRadius(), "% 10.3e") << " ]";
-  cout << FGREEN << ss.str() << AEND;
+  ss << "all_points_: "     << DBG_printMatrixXd(all_points_, " ") << "\n";
+  ss << "points_abs_: "     << DBG_printMatrixXd(points_abs_, " ") << "\n";
+  ss << "points_shifted_: " << DBG_printMatrixXd(points_shifted_, " ") << "\n";
 
-  DBG_printToFile(DBG_fn_pivp_, ss.str());
+  DBG_printToFile(DBG_fn_mdat_, ss.str());
 }
 
 void TrustRegionModel::DBG_printExchangePoint(string msg,
@@ -1652,6 +1672,7 @@ void TrustRegionModel::DBG_printExchangePoint(string msg,
   ss << "cached_points_: "  << DBG_printMatrixXd(cached_points_, " ") << "\n";
   ss << "fvalues_: "        << DBG_printVectorXd(fvalues_) << "\n";
   ss << "points_abs_: "     << DBG_printMatrixXd(points_abs_, " ") << "\n";
+  ss << "points_shifted_: " << DBG_printMatrixXd(points_shifted_, " ") << "\n";
 
   DBG_printToFile(DBG_fn_xchp_, ss.str());
 
