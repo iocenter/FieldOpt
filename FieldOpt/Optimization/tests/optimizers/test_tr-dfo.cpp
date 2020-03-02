@@ -200,38 +200,38 @@ namespace {
     //     EXPECT_TRUE(RunnerSubs(tr_mdata.prob_hs1, hs1));
     // }
 
-   TEST_F(TrustRegionTest, trDfoProb1) {
-       cout << endl << FMAGENTA << "[          ] =============="
-            << "=========================================== " << endl
-            << "[ CG.prob1 ] "
-            << " f = @(x) (1 - x(1))^2; x0=[-1.2 2.0]" << END << endl;
-
-       SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
-       EXPECT_TRUE(RunnerSubs(tr_mdata.prob1, tr_dfo_prob1));
-   }
-
-  TEST_F(TrustRegionTest, trDfoProb2) {
-      cout << endl << FMAGENTA << "[          ] =============="
-           << "=========================================== " << endl
-           << "[ CG.prob2 ] "
-           << "f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
-           << END << endl;
-
-      SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
-      EXPECT_TRUE(RunnerSubs(tr_mdata.prob2, tr_dfo_prob2));
-  }
-
-//    TEST_F(TrustRegionTest, trDfoProb3) {
-//        cout << endl << FMAGENTA << "[          ] =============="
-//             << "=========================================== " << endl
-//             << "[ CG.prob3 ] "
-//             << "f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
-//             << END << endl;
+//   TEST_F(TrustRegionTest, trDfoProb1) {
+//       cout << endl << FMAGENTA << "[          ] =============="
+//            << "=========================================== " << endl
+//            << "[ CG.prob1 ] "
+//            << " f = @(x) (1 - x(1))^2; x0=[-1.2 2.0]" << END << endl;
 //
-//        SetUpOptimizer(tr_mdata.prob3, tr_dfo_prob3);
-//        EXPECT_TRUE(RunnerSubs(tr_mdata.prob3, tr_dfo_prob3));
-//    }
+//       SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
+//       EXPECT_TRUE(RunnerSubs(tr_mdata.prob1, tr_dfo_prob1));
+//   }
 //
+//  TEST_F(TrustRegionTest, trDfoProb2) {
+//      cout << endl << FMAGENTA << "[          ] =============="
+//           << "=========================================== " << endl
+//           << "[ CG.prob2 ] "
+//           << "f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
+//           << END << endl;
+//
+//      SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
+//      EXPECT_TRUE(RunnerSubs(tr_mdata.prob2, tr_dfo_prob2));
+//  }
+
+    TEST_F(TrustRegionTest, trDfoProb3) {
+        cout << endl << FMAGENTA << "[          ] =============="
+             << "=========================================== " << endl
+             << "[ CG.prob3 ] "
+             << "f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
+             << END << endl;
+
+        SetUpOptimizer(tr_mdata.prob3, tr_dfo_prob3);
+        EXPECT_TRUE(RunnerSubs(tr_mdata.prob3, tr_dfo_prob3));
+    }
+
 //   TEST_F(TrustRegionTest, trDfoProb4) {
 //       cout << endl << FMAGENTA << "[          ] =============="
 //            << "=========================================== " << endl

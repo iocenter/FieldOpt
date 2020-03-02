@@ -102,6 +102,11 @@ TrustRegionModel::TrustRegionModel(
     DBG_fn_sdat_ = "FORe_SettingsData_" + settings_->parameters().tr_prob_name + ".txt";
     DBG_fn_xchp_ = "FORe_ExchPoint_" + settings_->parameters().tr_prob_name + ".txt";
     DBG_fn_co2m_ = "FORe_Coeffs2Mat_" + settings_->parameters().tr_prob_name + ".txt";
+    DBG_fn_m2co_ = "FORe_Mat2Coeffs_" + settings_->parameters().tr_prob_name + ".txt";
+
+    DBG_fn_pcfs_ = "FORe_PolyCoeffs_" + settings_->parameters().tr_prob_name + ".txt";
+
+
 }
 
 void TrustRegionModel::moveToBestPoint() {
@@ -113,6 +118,7 @@ void TrustRegionModel::moveToBestPoint() {
 
 VectorXd TrustRegionModel::measureCriticality() {
     //!<g is just the gradient, measured on the tr_center>
+    DBG_printPolynomials("measureCriticality", modeling_polynomials_[0]);
     auto mMatrix = getModelMatrices(0);
 
     //!<Projected gradient>
@@ -138,6 +144,7 @@ ModelMatrix TrustRegionModel::getModelMatrices(int m) {
     VectorXd g(p.dimension);
     MatrixXd H(p.dimension, p.dimension);
 
+    DBG_printPolynomials("getModelMatrices", p);
     tie(c, g, H) = coefficientsToMatrices(p.dimension,
                                           p.coefficients);
 
@@ -180,6 +187,7 @@ bool TrustRegionModel::criticalityStep(double radius_before_criticality_step) {
 
     // Get gradient (g) at TR center
     // Note: assuming center polynomial is at position "0"
+    DBG_printPolynomials("criticalityStep", modeling_polynomials_[0]);
     auto mMatrix = getModelMatrices(0);
 
     // Project gradient
@@ -508,7 +516,9 @@ bool TrustRegionModel::rebuildModel() {
   DBG_printModelData("rowPivotGaussianElimination-01");
 
   double cache_size = std::min(double(n_points - last_pt_included - 1), 3 * pow(dim, 2));
-  modeling_polynomials_.clear();
+
+  modeling_polynomials_.clear(); // Remove? Already been cleared it seems
+//  DBG_printPolynomials("rowPivotGaussianElimination-02", modeling_polynomials_[0]);
 
   //!<Points not included>
   if (cache_size > 0) {
@@ -895,7 +905,10 @@ int TrustRegionModel::changeTrCenter(
 std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
   auto x_tr_center = points_abs_.col(tr_center_);
   auto p = getModelingPolynomials()[0];
+  DBG_printPolynomials("solveTrSubproblem-00", p);
+
   auto ps = shiftPolynomial(p, -x_tr_center); //!<Shift to origin>
+  DBG_printPolynomials("solveTrSubproblem-01", ps);
 
   Eigen::VectorXd trial_point(getXDim(), 1);
   double trial_fval;
@@ -1061,7 +1074,25 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
     points_abs_.conservativeResize(nr, nc+1);
     points_abs_.col(next_position) = new_point;
 
+    DBG_printDouble((double)modeling_polynomials_.empty(),
+        "mod_polys_.empty() - 00: % 10.0e ", DBG_fn_pcfs_);
+    DBG_printVectorXd(modeling_polynomials_[0].coefficients,
+        "mod_polys_ vector b/f clear() 00:       ", "% 10.3e ", DBG_fn_pcfs_);
+    DBG_printPolynomials("addPoint b/f clear()             -- 00", modeling_polynomials_[0]);
+
     modeling_polynomials_.clear();
+
+    DBG_printPolynomials("addPoint a/f clear(), b/f access -- 01", modeling_polynomials_[0]);
+    DBG_printVectorXd(modeling_polynomials_[0].coefficients,
+        "mod_polys_ vector a/f clear() 01:       ", "% 10.3e ", DBG_fn_pcfs_);
+    DBG_printDouble((double)modeling_polynomials_.empty(),
+        "mod_polys_.empty() - 01: % 10.0e ", DBG_fn_pcfs_);
+    DBG_printPolynomials("addPoint a/f clear(), a/f access -- 02", modeling_polynomials_[0]);
+
+
+
+
+
     // pivot_values_.conservativeResize(pivot_values_.cols() + 1); // bug: should not be resized.
     pivot_values_(next_position) = pivot_value;
   }
@@ -1136,7 +1167,10 @@ std::tuple<bool,int> TrustRegionModel::exchangePoint(
       points_abs_.col(max_poly_i) = new_point;
       fvalues_(max_poly_i) = new_fvalue;
       pivot_values_(max_poly_i) = new_pivot_val;
+
       modeling_polynomials_.clear();
+      DBG_printPolynomials("exchangePoint", modeling_polynomials_[0]);
+
       succeeded = true;
       pt_i = max_poly_i;
     } else {
@@ -1208,6 +1242,8 @@ void TrustRegionModel::computePolynomialModels() {
     }
   }
   modeling_polynomials_ = polynomials;
+  DBG_printPolynomials("computePolynomialModels", modeling_polynomials_[0]);
+
   DBG_printPivotPolynomials("computePolynomialModels-01");
 }
 
@@ -1350,6 +1386,10 @@ Polynomial TrustRegionModel::matricesToPolynomial(
   Polynomial p;
   p.dimension = dim;
   p.coefficients = coefficients;
+
+  DBG_printFunctionData("matricesToPolynomial", "",
+                        coefficients, coefficients, coefficients,
+                        c0, (double)dim, (double)n_terms);
   return p;
 }
 
@@ -1477,6 +1517,8 @@ double TrustRegionModel::evaluatePolynomial(
   double terms[3];
   VectorXd g(p1.dimension);
   MatrixXd H(p1.dimension, p1.dimension);
+
+  DBG_printPolynomials("evaluatePolynomial", p1);
   std::tie(c, g, H) = coefficientsToMatrices(p1.dimension, p1.coefficients);
 
   VectorXd xv(3); xv << c, g.prod(), H.prod();
@@ -1636,12 +1678,18 @@ RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
   return l_alpha;
 }
 
-void TrustRegionModel::DBG_printHeader(stringstream &ss, string msg) {
+void TrustRegionModel::DBG_printHeader(stringstream &ss, string msg, int htype) {
   string ENDSTRN = string(100, '=');
-  ss << ENDSTRN << endl;
 
   if (msg != "") {
-    ss << "[" << msg << "]" << endl;
+    if ( htype == 0 ) {
+      ss << ENDSTRN << endl;
+      ss << "[" << msg << "]" << endl;
+
+    } else if ( htype == 1 ) {
+      Printer::pad_text(msg, 28);
+      ss << "[" << msg << "]";
+    }
   }
 }
 
@@ -1741,12 +1789,26 @@ void TrustRegionModel::DBG_printFunctionData(
     ss << "g:      " << DBG_printVectorXd(v1) << "\n";
     fn = DBG_fn_co2m_;
 
+  } else if (fnm == "matricesToPolynomial") {
+    ss << "[ c0:      " << DBG_printDouble(d0, "% 2.0f") << " ]\n";
+    ss << "[ dim:     " << DBG_printDouble(d1, "% 2.0f") << " ]\n";
+    ss << "[ n_terms: " << DBG_printDouble(d2, "% 2.0f") << " ]\n";
+    ss << "coeffs: " << DBG_printVectorXd(v0) << "\n";
+    fn = DBG_fn_m2co_;
+
   } else if (fnm == "none") {
     cout << "Specify function name" << "\n";
   }
 
   DBG_printToFile(fn, ss.str());
 
+}
+
+void TrustRegionModel::DBG_printPolynomials(string msg, Polynomial polynomial) {
+  stringstream ss;
+  if (msg != "") DBG_printHeader(ss, msg, 1);
+  ss << DBG_printVectorXd(polynomial.coefficients) << endl;
+  DBG_printToFile(DBG_fn_pcfs_, ss.str());
 }
 
 void TrustRegionModel::DBG_printPivotPolynomials(string msg="") {
@@ -1811,6 +1873,7 @@ Polynomial TrustRegionModel::shiftPolynomial(Polynomial polynomial, VectorXd s) 
   VectorXd g(polynomial.dimension);
   MatrixXd H(polynomial.dimension, polynomial.dimension);
 
+  DBG_printPolynomials("shiftPolynomial", polynomial);
   std::tie(c, g, H) = coefficientsToMatrices(polynomial.dimension, polynomial.coefficients);
 
   double c_mod = c + (double)(g.transpose()*s) + 0.5*(double)(s.transpose()*H*s);
@@ -1999,6 +2062,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       pivot_values_((int)pos) *= new_pivot_value;
 
       modeling_polynomials_.clear();
+      DBG_printPolynomials("chooseAndReplacePoint", modeling_polynomials_[0]);
+
       success = true;
     }
   }
@@ -2128,6 +2193,8 @@ TrustRegionModel::minimizeTr(Polynomial p,
     double c;
     Eigen::VectorXd g(p.dimension);
     Eigen::MatrixXd H(p.dimension, p.dimension);
+
+    DBG_printPolynomials("minimizeTr", p);
     tie(c, g, H) = coefficientsToMatrices(p.dimension,
                                           p.coefficients);
 

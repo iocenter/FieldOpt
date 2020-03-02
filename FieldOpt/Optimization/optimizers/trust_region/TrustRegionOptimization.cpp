@@ -583,7 +583,7 @@ Optimization::Optimizer::TerminationCondition
 TrustRegionOptimization::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
 
-    if (tr_model_->isInitialized()) {
+    if (tr_model_->isInitialized() && !tr_model_->getModelingPolynomials().empty()) {
 
       auto model_criticality = tr_model_->measureCriticality();
       tr_model_->DBG_printVectorXd(model_criticality,

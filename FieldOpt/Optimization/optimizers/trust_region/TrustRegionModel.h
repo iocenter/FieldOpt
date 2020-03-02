@@ -70,9 +70,10 @@ class TrustRegionModel {
             );
 
     void DBG_printPivotPolynomials(string msg);
+    void DBG_printPolynomials(string msg, Polynomial polynomial);
     void DBG_printToFile(string fn, string sout);
 
-    void DBG_printHeader(stringstream &ss, string msg="");
+    void DBG_printHeader(stringstream &ss, string msg="", int htype=0);
     void DBG_printModelData(string msg="");
     void DBG_printSettingsData(string msg="");
 
@@ -133,6 +134,8 @@ class TrustRegionModel {
     string DBG_fn_sdat_;
     string DBG_fn_xchp_;
     string DBG_fn_co2m_;
+    string DBG_fn_m2co_;
+    string DBG_fn_pcfs_;
 
     SNOPTSolver *SNOPTSolver_;
 
