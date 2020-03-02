@@ -184,9 +184,15 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
       {"Parameters", QJsonObject{
           {"MaxEvaluations", 3},
           {"InitialTrustRegionRadius", 1},
-          {"TrustRegionLowerBound", -std::numeric_limits<double>::infinity()},
-          {"TrustRegionUpperBound", std::numeric_limits<double>::infinity()},
-          {"RNGSeed", 25}
+          {"TrustRegionLowerBound", -1000},
+          {"TrustRegionUpperBound", 1000},
+//          {"TrustRegionLowerBound", -std::numeric_limits<double>::infinity()},
+//          {"TrustRegionUpperBound", std::numeric_limits<double>::infinity()},
+          {"RNGSeed", 25},
+          {"CriticalityMu", 100},
+          {"CriticalityOmega", 0.5},
+          {"CriticalityBeta", 10},
+          {"ProblemName", "prob0"}
       }},
       {"Objective", obj_fun_},
   };

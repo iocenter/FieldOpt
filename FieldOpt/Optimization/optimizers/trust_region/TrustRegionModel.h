@@ -74,6 +74,16 @@ class TrustRegionModel {
 
     void DBG_printHeader(stringstream &ss, string msg="");
     void DBG_printModelData(string msg="");
+    void DBG_printSettingsData(string msg="");
+
+  void DBG_printFunctionData(
+      string fnm = "none", string msg = "",
+      VectorXd v0 = VectorXd::Zero(0),
+      VectorXd v1 = VectorXd::Zero(0),
+      VectorXd v2 = VectorXd::Zero(0),
+      double d0 = -9.99, double d1 = -9.99,
+      double d2 = -9.99);
+
     void DBG_printExchangePoint(string msg="",
         VectorXd v0 = VectorXd::Zero(0),
         VectorXd v1 = VectorXd::Zero(0));
@@ -120,7 +130,9 @@ class TrustRegionModel {
 
     string DBG_fn_pivp_;
     string DBG_fn_mdat_;
+    string DBG_fn_sdat_;
     string DBG_fn_xchp_;
+    string DBG_fn_co2m_;
 
     SNOPTSolver *SNOPTSolver_;
 

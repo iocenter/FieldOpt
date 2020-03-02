@@ -99,8 +99,9 @@ TrustRegionModel::TrustRegionModel(
 
     DBG_fn_pivp_ = "FORe_PivotPolyns_" + settings_->parameters().tr_prob_name + ".txt";
     DBG_fn_mdat_ = "FORe_ModelData_" + settings_->parameters().tr_prob_name + ".txt";
+    DBG_fn_sdat_ = "FORe_SettingsData_" + settings_->parameters().tr_prob_name + ".txt";
     DBG_fn_xchp_ = "FORe_ExchPoint_" + settings_->parameters().tr_prob_name + ".txt";
-
+    DBG_fn_co2m_ = "FORe_Coeffs2Mat_" + settings_->parameters().tr_prob_name + ".txt";
 }
 
 void TrustRegionModel::moveToBestPoint() {
@@ -119,6 +120,12 @@ VectorXd TrustRegionModel::measureCriticality() {
     VectorXd xmax = lb_.cwiseMax(tr_center_pt - mMatrix.g);
     VectorXd xmin = ub_.cwiseMin(xmax);
     VectorXd xdiff = xmin - tr_center_pt;
+
+    DBG_printVectorXd(mMatrix.g,    "mMatrix.g:    ", "% 10.3e ", DBG_fn_mdat_);
+    DBG_printVectorXd(tr_center_pt, "tr_center_pt: ", "% 10.3e ", DBG_fn_mdat_);
+    DBG_printVectorXd(xmax,         "xmax:         ", "% 10.3e ", DBG_fn_mdat_);
+    DBG_printVectorXd(xmin,         "xmin:         ", "% 10.3e ", DBG_fn_mdat_);
+    DBG_printVectorXd(xdiff,        "xdiff:        ", "% 10.3e ", DBG_fn_mdat_);
 
     return xdiff;
 }
@@ -139,7 +146,7 @@ ModelMatrix TrustRegionModel::getModelMatrices(int m) {
     mMatrix.g.conservativeResize(g.rows());
     mMatrix.g = g;
 
-    mMatrix.H.conservativeResize(H.rows(),H.cols());
+    mMatrix.H.conservativeResize(H.rows(), H.cols());
     mMatrix.H = H;
 
     return mMatrix;
@@ -495,9 +502,9 @@ bool TrustRegionModel::rebuildModel() {
 
   DBG_printModelData("rowPivotGaussianElimination-00");
   tr_center_ = 0;
-  points_abs_ = all_points_.leftCols(last_pt_included + 1);
+  points_abs_ = all_points_.leftCols(last_pt_included + 1).eval();
   points_shifted_ = points_shifted_.leftCols(last_pt_included + 1).eval();
-  fvalues_ = all_fvalues_.head(last_pt_included + 1);
+  fvalues_ = all_fvalues_.head(last_pt_included + 1).eval();
   DBG_printModelData("rowPivotGaussianElimination-01");
 
   double cache_size = std::min(double(n_points - last_pt_included - 1), 3 * pow(dim, 2));
@@ -505,9 +512,8 @@ bool TrustRegionModel::rebuildModel() {
 
   //!<Points not included>
   if (cache_size > 0) {
-    cached_points_ = all_points_.middleCols(last_pt_included+1, cache_size);
-    cached_fvalues_ = all_fvalues_.segment(last_pt_included+1, cache_size);
-    
+    cached_points_ = all_points_.middleCols(last_pt_included+1, cache_size).eval();
+    cached_fvalues_ = all_fvalues_.segment(last_pt_included+1, cache_size).eval();
   } else {
     cached_points_.conservativeResize(0, 0);
     cached_fvalues_.conservativeResize(0);
@@ -564,8 +570,8 @@ bool TrustRegionModel::improveModelNfp() {
   // Matlab version: unshift_point = @(x) max(min(x + shift_center, bu), bl);
   auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
     Eigen::VectorXd shifted_x = x + shift_center;
-    shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center);
-    shifted_x = shifted_x.cwiseMax(bl_shifted+shift_center);
+    shifted_x = shifted_x.cwiseMin(bu_shifted + shift_center);
+    shifted_x = shifted_x.cwiseMax(bl_shifted + shift_center);
     return shifted_x;
   };
 
@@ -573,8 +579,7 @@ bool TrustRegionModel::improveModelNfp() {
   //!<Distance measured in inf norm>
   auto tr_center_pt = points_shifted_.col(tr_center);
 
-  if ((tr_center_pt.lpNorm<Infinity>() > radius_factor*radius)
-  && (p_ini > dim+1)) {
+  if ((tr_center_pt.lpNorm<Infinity>() > radius_factor*radius) && (p_ini > dim+1)) {
     exit_flag = false; //!<Needs to rebuild>
   } else {
     //!<The model is not old>
@@ -1323,7 +1328,7 @@ Polynomial TrustRegionModel::matricesToPolynomial(
   //!<First order>
   int ind_coefficients = dim;
   int tol = 1e-06;
-  coefficients.segment(1,ind_coefficients) = g0;
+  coefficients.segment(1, ind_coefficients) = g0;
 
   //!<Second order>
   bool non_symmetric_H = false;
@@ -1348,8 +1353,7 @@ Polynomial TrustRegionModel::matricesToPolynomial(
   return p;
 }
 
-std::tuple<double, VectorXd, MatrixXd>
-    TrustRegionModel::coefficientsToMatrices(
+std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
     int dimension,
     VectorXd coefficients) {
 
@@ -1371,11 +1375,11 @@ std::tuple<double, VectorXd, MatrixXd>
 
   //!< Order one term>
   int idx_coefficients = dimension;
-  VectorXd g = coefficients.segment(1,idx_coefficients);
+  VectorXd g = coefficients.segment(1, idx_coefficients).eval();
 
   //!< Second order term>
   MatrixXd H(dimension, dimension);
-  H.setZero(dimension,dimension);
+  H.setZero(dimension, dimension);
 
   for (int k = 0; k < dimension; k++) {
     for (int m = 0; m <= k; m++) {
@@ -1385,6 +1389,8 @@ std::tuple<double, VectorXd, MatrixXd>
     }
   }
 
+  DBG_printFunctionData("coefficientsToMatrices", "",
+                        coefficients, g, g, dimension);
   return std::make_tuple(c, g, H);
 }
 
@@ -1412,8 +1418,7 @@ Polynomial TrustRegionModel::orthogonalizeToOtherPolynomials(
 
   DBG_printPivotPolynomials("orthogonalizeToOtherPolynomials-00");
   auto polynomial = pivot_polynomials_[poly_i];
-//  for (int n = 0; n <= last_pt; n++) {  // !!!!!!!!!!!!!!!! BUG ????????
-  for (int n = 0; n < last_pt; n++) {
+  for (int n = 0; n <= last_pt; n++) {
     if (n != poly_i) {
       polynomial = zeroAtPoint(polynomial,
                                pivot_polynomials_[n],
@@ -1655,6 +1660,32 @@ void TrustRegionModel::DBG_printModelData(string msg) {
   DBG_printToFile(DBG_fn_mdat_, ss.str());
 }
 
+void TrustRegionModel::DBG_printSettingsData(string msg) {
+  stringstream ss;
+  DBG_printHeader(ss, msg);
+
+  ss << "[ tr_init_radius:   " << DBG_printDouble(settings_->parameters().tr_initial_radius) << "]\n";
+  ss << "[ tr_tol_f:         " << DBG_printDouble(settings_->parameters().tr_tol_f) << "]\n";
+  ss << "[ tr_eps_c:         " << DBG_printDouble(settings_->parameters().tr_eps_c) << "]\n";
+  ss << "[ tr_eta_0:         " << DBG_printDouble(settings_->parameters().tr_eta_0) << "]\n";
+  ss << "[ tr_eta_1:         " << DBG_printDouble(settings_->parameters().tr_eta_1) << "]\n";
+  ss << "[ tr_piv_thresh:    " << DBG_printDouble(settings_->parameters().tr_pivot_threshold) << "]\n";
+  ss << "[ tr_add_thresh:    " << DBG_printDouble(settings_->parameters().tr_add_threshold) << "]\n";
+  ss << "[ tr_exch_thresh:   " << DBG_printDouble(settings_->parameters().tr_exchange_threshold) << "]\n";
+  ss << "[ tr_radius_max:    " << DBG_printDouble(settings_->parameters().tr_radius_max) << "]\n";
+  ss << "[ tr_radius_factor: " << DBG_printDouble(settings_->parameters().tr_radius_factor) << "]\n";
+  ss << "[ tr_tol_radius:    " << DBG_printDouble(settings_->parameters().tr_tol_radius) << "]\n";
+  ss << "[ tr_gamma_inc:     " << DBG_printDouble(settings_->parameters().tr_gamma_inc) << "]\n";
+  ss << "[ tr_gamma_dec:     " << DBG_printDouble(settings_->parameters().tr_gamma_dec) << "]\n";
+  ss << "[ tr_crit_mu:       " << DBG_printDouble(settings_->parameters().tr_criticality_mu) << "]\n";
+  ss << "[ tr_crit_beta:     " << DBG_printDouble(settings_->parameters().tr_criticality_beta) << "]\n";
+  ss << "[ tr_crit_omega:    " << DBG_printDouble(settings_->parameters().tr_criticality_omega) << "]\n";
+  ss << "[ tr_lower_bound:   " << DBG_printDouble(settings_->parameters().tr_lower_bound) << "]\n";
+  ss << "[ tr_upper_bound:   " << DBG_printDouble(settings_->parameters().tr_upper_bound) << "]\n";
+
+  DBG_printToFile(DBG_fn_sdat_, ss.str());
+}
+
 void TrustRegionModel::DBG_printExchangePoint(string msg,
     VectorXd v0, VectorXd v1) {
   stringstream ss;
@@ -1675,6 +1706,46 @@ void TrustRegionModel::DBG_printExchangePoint(string msg,
   ss << "points_shifted_: " << DBG_printMatrixXd(points_shifted_, " ") << "\n";
 
   DBG_printToFile(DBG_fn_xchp_, ss.str());
+
+}
+
+// =========================================================
+void TrustRegionModel::DBG_printFunctionData(
+    string fnm, string msg,
+    VectorXd v0, VectorXd v1, VectorXd v2,
+    double d0, double d1, double d2) {
+
+  stringstream ss;
+  string fn;
+
+  if (fnm == "exchangePoint") {
+    DBG_printHeader(ss, "FORe");
+    ss << "[ p_abs_.rows(): " << DBG_printDouble(points_abs_.rows(),   "% 2.0f") << " ]";
+    ss << "[ last_p: "        << DBG_printDouble(points_abs_.cols()-1, "% 2.0f") << " ]";
+    ss << "[ center_i: "      << DBG_printDouble((double)tr_center_,         "% 2.0f") << " ]";
+    ss << "[ radius_: "       << DBG_printDouble((double)radius_,"% 6.3e") << " ]\n";
+    ss << "new_point: "       << DBG_printVectorXd(v0);
+    ss << "shift_center: "    << DBG_printVectorXd(v1) << "\n";
+    ss << "pivot_values_: "   << DBG_printVectorXd(pivot_values_) << "\n";
+
+    ss << "cached_fvalues_: " << DBG_printVectorXd(cached_fvalues_) << "\n";
+    ss << "cached_points_: "  << DBG_printMatrixXd(cached_points_, " ") << "\n";
+    ss << "fvalues_: "        << DBG_printVectorXd(fvalues_) << "\n";
+    ss << "points_abs_: "     << DBG_printMatrixXd(points_abs_, " ") << "\n";
+    ss << "points_shifted_: " << DBG_printMatrixXd(points_shifted_, " ") << "\n";
+    fn = DBG_fn_xchp_;
+
+  } else if (fnm == "coefficientsToMatrices") {
+    ss << "[ dims: "  << DBG_printDouble(d0,   "% 2.0f") << " ]\n";
+    ss << "coeffs: " << DBG_printVectorXd(v0) << "\n";
+    ss << "g:      " << DBG_printVectorXd(v1) << "\n";
+    fn = DBG_fn_co2m_;
+
+  } else if (fnm == "none") {
+    cout << "Specify function name" << "\n";
+  }
+
+  DBG_printToFile(fn, ss.str());
 
 }
 

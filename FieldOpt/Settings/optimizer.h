@@ -87,7 +87,6 @@ class Optimizer
 
     // Trust Region Optimization parameters
     double tr_initial_radius = 1; //!< The initial trust region radius
-//    double tr_tol_f = 1e-6;
     double tr_tol_f = 1e-6;
     double tr_eps_c = 1e-5;
     double tr_eta_0 = 0;

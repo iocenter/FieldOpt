@@ -420,7 +420,7 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
             params.rng_seed = std::time(0);
         }
 
-      // RNG seed
+      // Max iter
       if (json_parameters.contains("TRMaxIter")) {
         params.tr_iter_max = json_parameters["TRMaxIter"].toInt();
       }

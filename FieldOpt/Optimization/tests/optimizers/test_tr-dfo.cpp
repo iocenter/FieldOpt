@@ -210,16 +210,16 @@ namespace {
        EXPECT_TRUE(RunnerSubs(tr_mdata.prob1, tr_dfo_prob1));
    }
 
-//    TEST_F(TrustRegionTest, trDfoProb2) {
-//        cout << endl << FMAGENTA << "[          ] =============="
-//             << "=========================================== " << endl
-//             << "[ CG.prob2 ] "
-//             << "f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
-//             << END << endl;
-//
-//        SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
-//        EXPECT_TRUE(RunnerSubs(tr_mdata.prob2, tr_dfo_prob2));
-//    }
+  TEST_F(TrustRegionTest, trDfoProb2) {
+      cout << endl << FMAGENTA << "[          ] =============="
+           << "=========================================== " << endl
+           << "[ CG.prob2 ] "
+           << "f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
+           << END << endl;
+
+      SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
+      EXPECT_TRUE(RunnerSubs(tr_mdata.prob2, tr_dfo_prob2));
+  }
 
 //    TEST_F(TrustRegionTest, trDfoProb3) {
 //        cout << endl << FMAGENTA << "[          ] =============="

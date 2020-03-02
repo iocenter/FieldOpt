@@ -97,6 +97,7 @@ void TrustRegionOptimization::iterate() {
             && !tr_model_->areReplacementPointsComputed()
             && !tr_model_->isInitialized()) {
 
+            tr_model_->DBG_printSettingsData("");
             bool is_model_changed = tr_model_->rebuildModel();
             tr_model_->setModelChanged(is_model_changed);
             tr_model_->moveToBestPoint();
@@ -157,16 +158,17 @@ void TrustRegionOptimization::iterate() {
       double tol_radius = settings_->parameters().tr_tol_radius;
       double eps_c = settings_->parameters().tr_eps_c;
       double tol_f = settings_->parameters().tr_tol_f;
-      double eta_1 = settings_->parameters().tr_eta_1;
-      double gamma_1 = gamma_dec_;
-      double gamma_2 = settings_->parameters().tr_gamma_inc;
-      double radius_max = settings_->parameters().tr_radius_max;
+//      double eta_1 = settings_->parameters().tr_eta_1;
+//      double gamma_1 = gamma_dec_;
+//      double gamma_2 = settings_->parameters().tr_gamma_inc;
+//      double radius_max = settings_->parameters().tr_radius_max;
       double err_model = 0.0;
 
       auto fval_current = tr_model_->getCurrentFval();
       auto x_current = tr_model_->getCurrentPoint();
 
       if (improve_model_) {
+        tr_model_->DBG_printModelData("EnsureImpr");
         mchange_flag_ = tr_model_->ensureImprovement();
         improve_model_ = ensureImprovementPostProcessing();
       }
@@ -183,9 +185,12 @@ void TrustRegionOptimization::iterate() {
           return; //end of the algorithm
 
         } else {
-          if (true || tr_model_->isLambdaPoised()) {//<Move among points that are part of the model>
+          //<Move among points that are part of the model>
+          if (true || tr_model_->isLambdaPoised()) {
+            tr_model_->DBG_printModelData("Move among model points");
             tr_model_->moveToBestPoint();
             tr_model_->computePolynomialModels();
+
             fval_current = tr_model_->getCurrentFval();
             x_current = tr_model_->getCurrentPoint();
             err_model = tr_model_->checkInterpolation();
@@ -194,6 +199,10 @@ void TrustRegionOptimization::iterate() {
           //!<Criticality step -- if we are possibly close to the optimum>
           criticality_step_performed_ = false;
           auto model_criticality = tr_model_->measureCriticality();
+          tr_model_->DBG_printVectorXd(model_criticality,
+                                       "model_criticality @ iterate:  ", "% 10.3e ",
+                                       tr_model_->DBG_fn_mdat_);
+
           if (model_criticality.norm() <= eps_c) {
             if (!criticality_step_execution_ongoing_) {
               criticality_init_radius_ = tr_model_->getRadius();
@@ -205,7 +214,6 @@ void TrustRegionOptimization::iterate() {
             }
             criticality_step_performed_ = true;
             if (model_criticality.norm() < tol_f) {
-              cout << "HELLO!!!!?????" << endl;
               Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
               return;
             }
@@ -576,7 +584,13 @@ TrustRegionOptimization::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
 
     if (tr_model_->isInitialized()) {
-      if (tr_model_->measureCriticality().norm() < settings_->parameters().tr_tol_f) {
+
+      auto model_criticality = tr_model_->measureCriticality();
+      tr_model_->DBG_printVectorXd(model_criticality,
+          "model_criticality @ isFinished:  ", "% 10.3e ",
+          tr_model_->DBG_fn_mdat_);
+
+      if (model_criticality.norm() < settings_->parameters().tr_tol_f) {
         tc =  OPTIMALITY_CRITERIA_REACHED;
       }
     }
