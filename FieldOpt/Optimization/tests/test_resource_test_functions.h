@@ -69,7 +69,7 @@ namespace TestResources {
         }
 
         /*!
-         * @brief CG.prob1 -> f = @(x) (1 - x(1))^2
+         * @brief CG.prob1 -> f = @(x) (1 - x(0))^2
          * Initial point: x0=[-1.2 2.0]
          */
         inline double tr_dfo_prob1(VectorXd xs) {
@@ -78,7 +78,7 @@ namespace TestResources {
         }
 
         /*!
-         * @brief CG.prob2 -> f = @(x) log1p(x(1)^2) + x(2)^2;
+         * @brief CG.prob2 -> f = @(x) log1p(x(0)^2) + x(1)^2;
          * Initial point: x0=[2.0 2.0]
          */
         inline double tr_dfo_prob2(VectorXd xs) {
@@ -88,7 +88,7 @@ namespace TestResources {
         }
 
         /*!
-         * @brief CG.prob3 -> f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16);
+         * @brief CG.prob3 -> f = @(x) sin(pi*x(0)/12) * cos(pi*x(1)/16);
          * Initial point: x0=[0.0 0.0]
          */
         inline double tr_dfo_prob3(VectorXd xs) {
@@ -98,7 +98,7 @@ namespace TestResources {
         }
 
         /*!
-         * @brief CG.prob4 -> f = @(x) 0.01*(x(1) - 1)^2 + (x(2) - x(1)^2)^2;
+         * @brief CG.prob4 -> f = @(x) 0.01*(x(0) - 1)^2 + (x(1) - x(0)^2)^2;
          * Initial point: x0=[2.0 2.0 2.0]
          */
         inline double tr_dfo_prob4(VectorXd xs) {
@@ -108,7 +108,7 @@ namespace TestResources {
         }
 
         /*!
-         * @brief CG.prob5 -> f = @(x) (x(1) - x(2))^2 + (x(2) - x(3))^4;
+         * @brief CG.prob5 -> f = @(x) (x(0) - x(1))^2 + (x(1) - x(2))^4;
          * Initial point: x0=[-2.6 2.0 2.0]
          */
         inline double tr_dfo_prob5(VectorXd xs) {
@@ -118,7 +118,7 @@ namespace TestResources {
         }
 
         /*!
-         * @brief CG.prob6 -> f = @(x) (x(1) + x(2))^2 + (x(2) + x(3))^2;
+         * @brief CG.prob6 -> f = @(x) (x(0) + x(1))^2 + (x(1) + x(2))^2;
          * Initial point: x0=[-4.0 1.0 1.0]
          */
         inline double tr_dfo_prob6(VectorXd xs) {
@@ -128,8 +128,8 @@ namespace TestResources {
         }
 
         /*!
-         * @brief CG.prob7 -> f = @(x) log1p(x(1)^2) + log1p((x(1)
-         * - x(2))^2) + log1p((x(2) - x(3))^2) + log1p((x(3) - x(4))^2);
+         * @brief CG.prob7 -> f = @(x) log1p(x(0)^2) + log1p((x(0)
+         * - x(1))^2) + log1p((x(1) - x(2))^2) + log1p((x(2) - x(3))^2);
          * Initial point: x0=[2.0 2.0 2.0 2.0]
          */
         inline double tr_dfo_prob7(VectorXd xs) {
@@ -141,7 +141,7 @@ namespace TestResources {
         }
 
         /*!
-         * @brief CG.prob8 -> f = @(x) (x(1)*x(2)*x(3)*x(4))^2;
+         * @brief CG.prob8 -> f = @(x) (x(0)*x(1)*x(2)*x(3))^2;
          * Initial point: x0=[0.8 0.8 0.8 0.8]
          */
         inline double tr_dfo_prob8(VectorXd xs) {
@@ -150,7 +150,7 @@ namespace TestResources {
         }
 
         /*!
-         * @brief CG.prob9 -> f = @(x) (x(1)-1)^2 + (x(2)-2)^2 + (x(3)-3)^2 + (x(4)-4)^2;
+         * @brief CG.prob9 -> f = @(x) (x(0)-1)^2 + (x(1)-2)^2 + (x(2)-3)^2 + (x(3)-4)^2;
          * Initial point: x0=[1.0 1.0 1.0 1.0]
          */
         inline double tr_dfo_prob9(VectorXd xs) {
@@ -163,8 +163,8 @@ namespace TestResources {
 
         /*!
          * @brief CG.prob10 -> f = @(x)
-         * (x(1) - x(2))^2 + (x(2) - x(3))^2 +
-         * (x(3) - x(4))^4 + (x(4) - x(5))^4;
+         * (x(0) - x(1))^2 + (x(1) - x(2))^2 +
+         * (x(2) - x(3))^4 + (x(3) - x(4))^4;
          * Initial point: x0=[2.0 sqrt(2) -1.0 2-sqrt(2) 0.5]
          */
         inline double tr_dfo_prob10(VectorXd xs) {
