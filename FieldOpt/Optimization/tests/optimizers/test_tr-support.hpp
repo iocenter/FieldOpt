@@ -99,25 +99,25 @@ namespace TestResources {
     // Eigen approach
     double tol = 1e-6;
     VectorXi idxa(vb.rows(),1);
-    // cout << "va: " << va.transpose() << endl;
-    // cout << "vb: " << vb.transpose() << endl << endl;
+     // cout << "va: " << va.transpose() << endl;
+     // cout << "vb: " << vb.transpose() << endl << endl;
 
     for (int ii=0; ii<vb.size(); ii++) {
 
-      // cout << "ii: " << ii << endl << endl;
+       // cout << "ii: " << ii << endl << endl;
 
       for (int jj=0; jj<va.size(); jj++) {
 
-        // cout << "jj: " << jj << endl;
-        // cout << "va(jj=" << jj << ") : " << va(jj) << endl;
-        // cout << "vb(ii=" << ii << ") : " << vb(ii) << endl;
+         // cout << "jj: " << jj << endl;
+         // cout << "va(jj=" << jj << ") : " << va(jj) << endl;
+         // cout << "vb(ii=" << ii << ") : " << vb(ii) << endl;
 
         if ( norm( va(jj) - vb(ii) ) < tol ) {
           idxa.row(ii) << jj;
           va(jj) = std::numeric_limits<double>::lowest();
 
-          // cout << "----" << endl << "va: " << va.transpose() << endl;
-          // cout << "idxa: [ " << idxa.transpose() << " ]" << endl << endl;
+           // cout << "----" << endl << "va: " << va.transpose() << endl;
+           // cout << "idxa: [ " << idxa.transpose() << " ]" << endl << endl;
           break;
 
         }

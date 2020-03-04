@@ -92,8 +92,8 @@ namespace {
 
             VectorXd ordered_vec(test_case_tr_dfo_probs_->GetRealVarVector().size());
             auto vec =test_case_tr_dfo_probs_->GetRealVarVector();
-            for (int i=0; i <prob.idx.size(); i++) {
-                ordered_vec(i) = vec(prob.idx[i]);
+            for (int i = 0; i < prob.idx.size(); i++) {
+                ordered_vec(prob.idx[i]) = vec(i);
             }
             test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
 
