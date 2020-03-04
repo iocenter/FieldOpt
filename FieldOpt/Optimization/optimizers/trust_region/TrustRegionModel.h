@@ -70,6 +70,7 @@ class TrustRegionModel {
             );
 
     void DBG_printPivotPolynomials(string msg);
+    void DBG_printPivotValues(string msg);
     void DBG_printPolynomials(string msg, Polynomial polynomial);
     void DBG_printToFile(string fn, string sout);
 

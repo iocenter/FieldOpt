@@ -1811,6 +1811,14 @@ void TrustRegionModel::DBG_printPolynomials(string msg, Polynomial polynomial) {
   DBG_printToFile(DBG_fn_pcfs_, ss.str());
 }
 
+void TrustRegionModel::DBG_printPivotValues(string msg="") {
+  stringstream ss;
+  if (msg != "") DBG_printHeader(ss, msg);
+  ss << DBG_printVectorXd(pivot_values_) << endl;
+  ss << DBG_printVectorXd(piv_order_) << endl;
+  DBG_printToFile(DBG_fn_pivp_, ss.str());
+}
+
 void TrustRegionModel::DBG_printPivotPolynomials(string msg="") {
   stringstream ss;
   DBG_printHeader(ss, msg);
@@ -1937,26 +1945,35 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   //TODO: test this function
   auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
     Eigen::VectorXd shifted_x = x + shift_center;
-    shifted_x = shifted_x.cwiseMin(bl_shifted+shift_center);
-    shifted_x = shifted_x.cwiseMax(bu_shifted+shift_center);
+    shifted_x = shifted_x.cwiseMin(bl_shifted + shift_center).eval();
+    shifted_x = shifted_x.cwiseMax(bu_shifted + shift_center).eval();
     return shifted_x;
   };
 
   //!<Reorder points based on their pivot_values>
-  piv_order_.setLinSpaced(pivot_values_.size(), 0, pivot_values_.size() - 1);
+  piv_order_.setLinSpaced(pivot_values_.size(), 0,
+      pivot_values_.size() - 1);
+  DBG_printPivotValues("chRplcPnt");
+
   std::sort(piv_order_.data(),
             piv_order_.data() + piv_order_.size(),
             std::bind(compareAbs,
                       std::placeholders::_1,
                       std::placeholders::_2,
                       pivot_values_.data()));
+  DBG_printPivotValues("chRplcPnt");
 
   int polynomials_num = pivot_polynomials_.size();
+  DBG_printPivotPolynomials("chooseAndReplacePoint-02");
+
   //!<Could iterate through all pivots, but will try just dealing with the worst one>
   auto pos = piv_order_(0);
-  if ((pos == 0) || (pos == tr_center) || (pos <= linear_terms && points_num > linear_terms)) {
+
+  if ((pos == 0) || (pos == tr_center)
+  || (pos <= linear_terms && points_num > linear_terms)) {
     //!<Better to just rebuild model>
     success = false;
+
   } else {
     double new_pivot_value = 1;
     auto current_pivot_value = pivot_values_(pos);
@@ -1986,7 +2003,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
             repl_pt_case_uuid_.push_back(new_case->id());
           }
-          return true; //TODO Probably not necessary
+//          return true; //TODO Probably not necessary
+//          return 5; //TODO Probably not necessary
 
         } else if (areReplacementPointsComputed()) {
           f_succeeded.conservativeResize(nfp_new_point_abs_.cols(), 1);
@@ -2027,6 +2045,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
       //!<Normalize polynomial value>
       pivot_polynomials_[pos] = normalizePolynomial(pos, repl_new_point_shifted_);
+      DBG_printPivotPolynomials("chooseAndReplacePoint-03");
 
       //!<Orthogonalize polynomials on present block (all)>
       int block_beginning;
@@ -2067,6 +2086,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       success = true;
     }
   }
+  return success;
 }
 
 
