@@ -142,6 +142,20 @@ namespace {
                     TestResources::OverrideSecondPoint(prob, *next_case);
                 }
 
+                // Test if current point is equal to matlab data -----
+                if (p_count < 2) {
+
+                  // Print case data (id, x, f)
+                  TestResources::PrintCaseData(*next_case);
+
+                  string msg = "Checking point " +
+                      to_string(p_count + 1) + " is equal";
+
+                  TestResources::CheckSameVector(
+                      next_case->GetRealVarVector(),
+                      prob.xm.col(p_count), tol, msg);
+                }
+
                 // Finish Runner
                 tr_dfo_->SubmitEvaluatedCase(next_case);
 
@@ -232,32 +246,32 @@ namespace {
 //        EXPECT_TRUE(RunnerSubs(tr_mdata.prob3, tr_dfo_prob3));
 //    }
 
-   TEST_F(TrustRegionTest, trDfoProb4) {
-       cout << endl << FMAGENTA << "[          ] =============="
-            << "=========================================== " << endl
-            << "[ CG.prob4 ] "
-            << "f = @(x) 0.01*(x(0) - 1)^2 + (x(1) - x(0)^2)^2; x0=[2.0 2.0 2.0]"
-            << END << endl;
-
-       // -------------------------------------------------------
-       SetUpOptimizer(tr_mdata.prob4, tr_dfo_prob4);
-       EXPECT_TRUE(RunnerSubs(tr_mdata.prob4, tr_dfo_prob4));
-   }
-
-//   TEST_F(TrustRegionTest, trDfoProb5) {
+//   TEST_F(TrustRegionTest, trDfoProb4) {
 //       cout << endl << FMAGENTA << "[          ] =============="
 //            << "=========================================== " << endl
-//            << "[ CG.prob5 ] "
-//            << "f = @(x) (x(0)-x(1))^2 + (x(1) - x(2))^4; x0=[-2.6 2.0 2.0]"
+//            << "[ CG.prob4 ] "
+//            << "f = @(x) 0.01*(x(0) - 1)^2 + (x(1) - x(0)^2)^2; x0=[2.0 2.0 2.0]"
 //            << END << endl;
 //
 //       // -------------------------------------------------------
-//       SetUpOptimizer(tr_mdata.prob5, tr_dfo_prob5);
-//       auto success_runnersubs = RunnerSubs(tr_mdata.prob5, tr_dfo_prob5);
-//       cout << "success runnersubs: " << success_runnersubs << endl;
-//       EXPECT_TRUE(true);
+//       SetUpOptimizer(tr_mdata.prob4, tr_dfo_prob4);
+//       EXPECT_TRUE(RunnerSubs(tr_mdata.prob4, tr_dfo_prob4));
 //   }
-//
+
+   TEST_F(TrustRegionTest, trDfoProb5) {
+       cout << endl << FMAGENTA << "[          ] =============="
+            << "=========================================== " << endl
+            << "[ CG.prob5 ] "
+            << "f = @(x) (x(0)-x(1))^2 + (x(1) - x(2))^4; x0=[-2.6 2.0 2.0]"
+            << END << endl;
+
+       // -------------------------------------------------------
+       SetUpOptimizer(tr_mdata.prob5, tr_dfo_prob5);
+       auto success_runnersubs = RunnerSubs(tr_mdata.prob5, tr_dfo_prob5);
+       cout << "success runnersubs: " << success_runnersubs << endl;
+       EXPECT_TRUE(true);
+   }
+
 //   TEST_F(TrustRegionTest, trDfoProb6) {
 //       cout << endl << FMAGENTA << "[          ] =============="
 //            << "=========================================== " << endl
