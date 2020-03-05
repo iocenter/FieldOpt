@@ -408,6 +408,7 @@ bool TrustRegionModel::rebuildModel() {
   pivot_values_(0) = 1;
 
   //!<Gaussian elimination (using previous points)>
+  DBG_printModelData("rowPivotGaussianElim-00");
   for (int iter = 1; iter < polynomials_num; iter++) {
 
     pivot_polynomials_[poly_i] =
@@ -508,12 +509,12 @@ bool TrustRegionModel::rebuildModel() {
     }
   }
 
-  DBG_printModelData("rowPivotGaussianElimination-00");
+  DBG_printModelData("rowPivotGaussianElimination-01");
   tr_center_ = 0;
   points_abs_ = all_points_.leftCols(last_pt_included + 1).eval();
   points_shifted_ = points_shifted_.leftCols(last_pt_included + 1).eval();
   fvalues_ = all_fvalues_.head(last_pt_included + 1).eval();
-  DBG_printModelData("rowPivotGaussianElimination-01");
+  DBG_printModelData("rowPivotGaussianElimination-02");
 
   double cache_size = std::min(double(n_points - last_pt_included - 1), 3 * pow(dim, 2));
 
@@ -534,7 +535,8 @@ bool TrustRegionModel::rebuildModel() {
   all_fvalues_.conservativeResize(0);
 
   // checkDataSize("End of rebuildModel");
-  
+
+  DBG_printModelData("rowPivotGaussianElim-03");
   return last_pt_included < n_points;
 }
 
@@ -561,6 +563,7 @@ bool TrustRegionModel::improveModelNfp() {
   double new_pivot_value = 0.0; // ******!!!!!!
 
   DBG_printPivotPolynomials("improveModelNfp-00");
+  DBG_printModelData("improveModelNfp-00");
   auto pivot_polynomials = pivot_polynomials_;
   auto polynomials_num = pivot_polynomials.size();
 
@@ -580,8 +583,8 @@ bool TrustRegionModel::improveModelNfp() {
   // Matlab version: unshift_point = @(x) max(min(x + shift_center, bu), bl);
   auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
     Eigen::VectorXd shifted_x = x + shift_center;
-    shifted_x = shifted_x.cwiseMin(bu_shifted + shift_center);
-    shifted_x = shifted_x.cwiseMax(bl_shifted + shift_center);
+    shifted_x = shifted_x.cwiseMin(bu_shifted + shift_center).eval();
+    shifted_x = shifted_x.cwiseMax(bl_shifted + shift_center).eval();
     return shifted_x;
   };
 
@@ -762,6 +765,7 @@ bool TrustRegionModel::improveModelNfp() {
   }
 
   DBG_printPivotPolynomials("improveModelNfp-01");
+  DBG_printModelData("improveModelNfp-01");
   return exit_flag;
 }
 
@@ -772,14 +776,16 @@ int TrustRegionModel::ensureImprovement() {
   int exit_flag = 0;
   bool success = false;
 
+  DBG_printModelData("EnsureImpr-00");
+
   if (!model_complete && (!model_old || !model_fl)) {
     //!<Calculate a new point to add>
     // checkDataSize("Before improveModelNfp"); // dbg
     success = improveModelNfp(); //!<improve model>
-    if (!checkDataSize("After improveModelNfp")){ // dbg
-      cerr << "success: " << success << endl;
-      cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
-    } // checkDataSize
+    // if (!checkDataSize("After improveModelNfp")){ // dbg
+    //  cerr << "success: " << success << endl;
+    //  cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
+    //} // checkDataSize
       
 
     if ((success) || (!success && improvement_cases_.size() > 0)) {
@@ -789,33 +795,36 @@ int TrustRegionModel::ensureImprovement() {
     //!<Replace some point with a new one that improves geometry>
     // checkDataSize("Before chooseAndReplacePoint"); // dbg
     success = chooseAndReplacePoint(); //!<replace point>
-    if (!checkDataSize("After chooseAndReplacePoint")){ // dbg
-      cerr << "success: " << success << endl;
-      cerr << "replacement_cases size: " << replacement_cases_.size() << endl;
-    } // dbg
+    // if (!checkDataSize("After chooseAndReplacePoint")){ // dbg
+    //  cerr << "success: " << success << endl;
+    //  cerr << "replacement_cases size: " << replacement_cases_.size() << endl;
+    // } // dbg
     if ((success) || (!success && replacement_cases_.size() > 0))  {
       exit_flag = 2;
     }
   }
+
+  DBG_printModelData("EnsureImpr-01");
+
   if ((!success) && (improvement_cases_.size() == 0) && (replacement_cases_.size() == 0)) {
-    checkDataSize("Before rebuildModel"); // dbg
+    // checkDataSize("Before rebuildModel"); // dbg
     bool model_changed = rebuildModel();
-    checkDataSize("After rebuildModel"); // dbg
+    // checkDataSize("After rebuildModel"); // dbg
     if (!model_changed) {
       if (!model_complete) {
         //!<Improve model>
-	      checkDataSize("Before improveModelNfp second"); // dbg
+	      // checkDataSize("Before improveModelNfp second"); // dbg
         success = improveModelNfp();
-        if (!checkDataSize("After improveModelNfp second")){ // dbg
-          cerr << "success: " << success << endl;
-          cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
-        } // dbg
+        // if (!checkDataSize("After improveModelNfp second")){ // dbg
+        //  cerr << "success: " << success << endl;
+        //  cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
+        //} // dbg
 
         } else {
         //!<Replace point>
-	      checkDataSize("Before chooseandreplace"); // dbg
+	      // checkDataSize("Before chooseandreplace"); // dbg
         success = chooseAndReplacePoint();
-        checkDataSize("After chooseandreplace"); // dbg
+        // checkDataSize("After chooseandreplace"); // dbg
       }
     } else {
       success = true;
@@ -826,6 +835,8 @@ int TrustRegionModel::ensureImprovement() {
       exit_flag = 4;
     }
   }
+
+  DBG_printModelData("EnsureImpr-02");
   return exit_flag;
 }
 
@@ -1082,12 +1093,14 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
 
     modeling_polynomials_.clear();
 
-    DBG_printPolynomials("addPoint a/f clear(), b/f access -- 01", modeling_polynomials_[0]);
-    DBG_printVectorXd(modeling_polynomials_[0].coefficients,
-        "mod_polys_ vector a/f clear() 01:       ", "% 10.3e ", DBG_fn_pcfs_);
+    // DBG_printPolynomials("addPoint a/f clear(), b/f access -- 01",
+    // modeling_polynomials_[0]);
+    // DBG_printVectorXd(modeling_polynomials_[0].coefficients,
+    //    "mod_polys_ vector a/f clear() 01:       ", "% 10.3e ", DBG_fn_pcfs_);
     DBG_printDouble((double)modeling_polynomials_.empty(),
         "mod_polys_.empty() - 01: % 10.0e ", DBG_fn_pcfs_);
-    DBG_printPolynomials("addPoint a/f clear(), a/f access -- 02", modeling_polynomials_[0]);
+    // DBG_printPolynomials("addPoint a/f clear(), a/f access -- 02",
+    //    modeling_polynomials_[0]);
 
 
 
@@ -1705,6 +1718,9 @@ void TrustRegionModel::DBG_printModelData(string msg) {
   ss << "points_abs_: "     << DBG_printMatrixXd(points_abs_, " ") << "\n";
   ss << "points_shifted_: " << DBG_printMatrixXd(points_shifted_, " ") << "\n";
 
+  ss << "repl_new_point_shifted_: " << DBG_printMatrixXd(repl_new_point_shifted_, " ") << "\n";
+  ss << "repl_new_pivots_: " << DBG_printMatrixXd(repl_new_pivots_, " ") << "\n";
+
   DBG_printToFile(DBG_fn_mdat_, ss.str());
 }
 
@@ -1928,7 +1944,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   auto shift_center = points_abs_.col(0);
   auto tr_center_x = points_shifted_.col(tr_center);
 
-  DBG_printPivotPolynomials("chooseAndReplacePoint-01");
+  DBG_printPivotPolynomials("chooseAndReplacePoint-00");
+  DBG_printModelData("chooseAndReplacePoint-00");
   auto pivot_values = pivot_values_;
   auto pivot_polynomials = pivot_polynomials_;
 
@@ -1964,7 +1981,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   DBG_printPivotValues("chRplcPnt");
 
   int polynomials_num = pivot_polynomials_.size();
-  DBG_printPivotPolynomials("chooseAndReplacePoint-02");
+  DBG_printPivotPolynomials("chooseAndReplacePoint-01");
+  DBG_printModelData("chooseAndReplacePoint-01");
 
   //!<Could iterate through all pivots, but will try just dealing with the worst one>
   auto pos = piv_order_(0);
@@ -1981,6 +1999,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
     if (!areReplacementPointsComputed()) {
       std::tie(repl_new_point_shifted_, repl_new_pivots_, repl_point_found_) =
               pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
+      DBG_printModelData("chooseAndReplacePoint-02");
     }
 
     if (repl_point_found_) {
@@ -1988,8 +2007,10 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
         if (!areReplacementPointsComputed()) {
 
+          DBG_printModelData("chooseAndReplacePoint-03");
           repl_new_point_shifted_ = repl_new_point_shifted_.col(found_i);
           auto new_pivot_value = repl_new_pivots_(found_i);
+          DBG_printModelData("chooseAndReplacePoint-04");
 
           repl_new_point_abs_ = unshift_point(repl_new_point_shifted_);
           repl_new_fvalues_.conservativeResize(repl_new_point_abs_.cols());
@@ -2046,6 +2067,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       //!<Normalize polynomial value>
       pivot_polynomials_[pos] = normalizePolynomial(pos, repl_new_point_shifted_);
       DBG_printPivotPolynomials("chooseAndReplacePoint-03");
+      DBG_printModelData("chooseAndReplacePoint-05");
 
       //!<Orthogonalize polynomials on present block (all)>
       int block_beginning;
@@ -2082,6 +2104,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
       modeling_polynomials_.clear();
       DBG_printPolynomials("chooseAndReplacePoint", modeling_polynomials_[0]);
+      DBG_printModelData("chooseAndReplacePoint-06");
 
       success = true;
     }

@@ -168,7 +168,6 @@ void TrustRegionOptimization::iterate() {
       auto x_current = tr_model_->getCurrentPoint();
 
       if (improve_model_) {
-        tr_model_->DBG_printModelData("EnsureImpr");
         mchange_flag_ = tr_model_->ensureImprovement();
         improve_model_ = ensureImprovementPostProcessing();
       }
