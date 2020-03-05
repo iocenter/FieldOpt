@@ -1997,18 +1997,18 @@ bool TrustRegionModel::chooseAndReplacePoint() {
     auto current_pivot_value = pivot_values_(pos);
 
     if (!areReplacementPointsComputed()) {
-      std::tie(repl_new_point_shifted_, repl_new_pivots_, repl_point_found_) =
+      std::tie(repl_new_points_shifted_, repl_new_pivots_, repl_point_found_) =
               pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
       DBG_printModelData("chooseAndReplacePoint-02");
     }
 
     if (repl_point_found_) {
-      for (int found_i = 0; found_i < repl_new_point_shifted_.cols(); found_i++) {
+      for (int found_i = 0; found_i < repl_new_points_shifted_.cols(); found_i++) {
 
         if (!areReplacementPointsComputed()) {
 
           DBG_printModelData("chooseAndReplacePoint-03");
-          repl_new_point_shifted_ = repl_new_point_shifted_.col(found_i);
+          repl_new_point_shifted_ = repl_new_points_shifted_.col(found_i);
           auto new_pivot_value = repl_new_pivots_(found_i);
           DBG_printModelData("chooseAndReplacePoint-04");
 
@@ -2096,6 +2096,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       cached_fvalues_.conservativeResize(nc_fv+1);
       cached_fvalues_.col(nc_fv) = fvalues_.col(pos);
 
+      DBG_printModelData("chooseAndReplacePoint-06");
       points_abs_.col(pos) = repl_new_point_abs_;
 
       fvalues_.col(pos) = repl_new_fvalues_;
@@ -2104,7 +2105,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
       modeling_polynomials_.clear();
       DBG_printPolynomials("chooseAndReplacePoint", modeling_polynomials_[0]);
-      DBG_printModelData("chooseAndReplacePoint-06");
+      DBG_printModelData("chooseAndReplacePoint-07");
 
       success = true;
     }
