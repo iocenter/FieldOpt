@@ -1718,6 +1718,9 @@ void TrustRegionModel::DBG_printModelData(string msg) {
   ss << "points_abs_: "     << DBG_printMatrixXd(points_abs_, " ") << "\n";
   ss << "points_shifted_: " << DBG_printMatrixXd(points_shifted_, " ") << "\n";
 
+  ss << "repl_new_point_abs_: " << DBG_printMatrixXd(repl_new_point_abs_, " ") << "\n";
+  ss << "repl_new_fvalues_: "   << DBG_printVectorXd(repl_new_fvalues_) << "\n";
+
   ss << "repl_new_point_shifted_: " << DBG_printMatrixXd(repl_new_point_shifted_, " ") << "\n";
   ss << "repl_new_pivots_: " << DBG_printMatrixXd(repl_new_pivots_, " ") << "\n";
 
