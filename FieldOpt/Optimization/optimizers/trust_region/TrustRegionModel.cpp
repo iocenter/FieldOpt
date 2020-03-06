@@ -1718,11 +1718,15 @@ void TrustRegionModel::DBG_printModelData(string msg) {
   ss << "points_abs_: "     << DBG_printMatrixXd(points_abs_, " ") << "\n";
   ss << "points_shifted_: " << DBG_printMatrixXd(points_shifted_, " ") << "\n";
 
+  ss << "repl_new_points_shifted_: " << DBG_printMatrixXd(repl_new_points_shifted_, " ") << "\n";
+  ss << "repl_new_point_shifted_: " << DBG_printMatrixXd(repl_new_point_shifted_, " ") << "\n";
+  ss << "repl_new_pivots_: " << DBG_printMatrixXd(repl_new_pivots_, " ") << "\n";
+
   ss << "repl_new_point_abs_: " << DBG_printMatrixXd(repl_new_point_abs_, " ") << "\n";
   ss << "repl_new_fvalues_: "   << DBG_printVectorXd(repl_new_fvalues_) << "\n";
 
-  ss << "repl_new_point_shifted_: " << DBG_printMatrixXd(repl_new_point_shifted_, " ") << "\n";
-  ss << "repl_new_pivots_: " << DBG_printMatrixXd(repl_new_pivots_, " ") << "\n";
+  ss << "lb_: " << DBG_printVectorXd(lb_, " ") << "\n";
+  ss << "ub_: "   << DBG_printVectorXd(ub_) << "\n";
 
   DBG_printToFile(DBG_fn_mdat_, ss.str());
 }
@@ -1947,8 +1951,6 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   auto shift_center = points_abs_.col(0);
   auto tr_center_x = points_shifted_.col(tr_center);
 
-  DBG_printPivotPolynomials("chooseAndReplacePoint-00");
-  DBG_printModelData("chooseAndReplacePoint-00");
   auto pivot_values = pivot_values_;
   auto pivot_polynomials = pivot_polynomials_;
 
@@ -1958,15 +1960,53 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   auto bu_shifted = ub_ - shift_center;
   bool success = false;
 
+  DBG_printPivotPolynomials("chooseAndReplacePoint-00");
+  DBG_printModelData("chooseAndReplacePoint-00");
+
   Eigen::Matrix<bool, 1, Dynamic> f_succeeded;
   f_succeeded.conservativeResize(1);
   f_succeeded.fill(false);
 
   //TODO: test this function
   auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
+
+    stringstream ss;
+    ss << "shift_cntr: ["; for (int ii = 0; ii < shift_center.size(); ii++) {
+    char buffer [100]; sprintf(buffer, "% 10.3e ", shift_center(ii)); ss << buffer;
+    } ss << "]\n";
+
+    ss << "bl_shifted: ["; for (int ii = 0; ii < bl_shifted.size(); ii++) {
+    char buffer [100]; sprintf(buffer, "% 10.3e ", bl_shifted(ii)); ss << buffer;
+    } ss << "]\n";
+
+    ss << "bu_shifted: ["; for (int ii = 0; ii < bu_shifted.size(); ii++) {
+    char buffer [100]; sprintf(buffer, "% 10.3e ", bu_shifted(ii)); ss << buffer;
+    } ss << "]\n";
+
     Eigen::VectorXd shifted_x = x + shift_center;
-    shifted_x = shifted_x.cwiseMin(bl_shifted + shift_center).eval();
-    shifted_x = shifted_x.cwiseMax(bu_shifted + shift_center).eval();
+
+    ss << "shifted_x0: ["; for (int ii = 0; ii < shifted_x.size(); ii++) {
+    char buffer [100]; sprintf(buffer, "% 10.3e ", shifted_x(ii)); ss << buffer;
+    } ss << "]\n";
+
+    shifted_x = shifted_x.cwiseMin(bu_shifted + shift_center).eval();
+
+    ss << "shifted_x1: ["; for (int ii = 0; ii < shifted_x.size(); ii++) {
+    char buffer [100]; sprintf(buffer, "% 10.3e ", shifted_x(ii)); ss << buffer;
+    } ss << "]\n";
+
+    shifted_x = shifted_x.cwiseMax(bl_shifted + shift_center).eval();
+
+    ss << "shifted_x2: ["; for (int ii = 0; ii < shifted_x.size(); ii++) {
+    char buffer [100]; sprintf(buffer, "% 10.3e ", shifted_x(ii)); ss << buffer;
+    } ss << "]\n";
+
+    string fn = "/home/bellout/git/IOC/FieldOpt-Research/FieldOpt/cmake-build-debug/bin/FORe_ModelData_prob11.txt";
+    FILE * pFile;
+    pFile = std::fopen(fn.c_str(), "a");
+    std::fprintf(pFile, "%s", ss.str().c_str());
+    fclose (pFile);
+
     return shifted_x;
   };
 
@@ -2011,12 +2051,14 @@ bool TrustRegionModel::chooseAndReplacePoint() {
         if (!areReplacementPointsComputed()) {
 
           DBG_printModelData("chooseAndReplacePoint-03");
+          DBG_printDouble((double)found_i, "found_i: % 10.0e ", DBG_fn_mdat_);
           repl_new_point_shifted_ = repl_new_points_shifted_.col(found_i);
           auto new_pivot_value = repl_new_pivots_(found_i);
-          DBG_printModelData("chooseAndReplacePoint-04");
 
           repl_new_point_abs_ = unshift_point(repl_new_point_shifted_);
+
           repl_new_fvalues_.conservativeResize(repl_new_point_abs_.cols());
+          DBG_printModelData("chooseAndReplacePoint-04");
 
           setIsReplacementNeeded(true);
 
@@ -2031,6 +2073,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 //          return 5; //TODO Probably not necessary
 
         } else if (areReplacementPointsComputed()) {
+
+          DBG_printModelData("chooseAndReplacePoint-05");
           f_succeeded.conservativeResize(nfp_new_point_abs_.cols(), 1);
           f_succeeded.fill(false);
 
@@ -2051,6 +2095,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
             f_succeeded(ii) = true;
 
           }
+
+          DBG_printModelData("chooseAndReplacePoint-06");
           setAreReplacementPointsComputed(false);
           repl_pt_case_uuid_.clear();
         }
@@ -2070,7 +2116,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       //!<Normalize polynomial value>
       pivot_polynomials_[pos] = normalizePolynomial(pos, repl_new_point_shifted_);
       DBG_printPivotPolynomials("chooseAndReplacePoint-03");
-      DBG_printModelData("chooseAndReplacePoint-05");
+      DBG_printModelData("chooseAndReplacePoint-07");
 
       //!<Orthogonalize polynomials on present block (all)>
       int block_beginning;
@@ -2099,7 +2145,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       cached_fvalues_.conservativeResize(nc_fv+1);
       cached_fvalues_.col(nc_fv) = fvalues_.col(pos);
 
-      DBG_printModelData("chooseAndReplacePoint-06");
+      DBG_printModelData("chooseAndReplacePoint-08");
       points_abs_.col(pos) = repl_new_point_abs_;
 
       fvalues_.col(pos) = repl_new_fvalues_;
@@ -2108,7 +2154,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
       modeling_polynomials_.clear();
       DBG_printPolynomials("chooseAndReplacePoint", modeling_polynomials_[0]);
-      DBG_printModelData("chooseAndReplacePoint-07");
+      DBG_printModelData("chooseAndReplacePoint-09");
 
       success = true;
     }
