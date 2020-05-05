@@ -23,6 +23,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_COLOR_MAKEFILE ON)
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
+#OLD behavior for policy CMP0042 will be removed in future versions of CMake.
+cmake_policy(SET CMP0054 OLD)
+
 # Sanitizing ===============================================
 option(USE_SANITIZING "Build sanitizing features for debugging"  OFF)
 if (USE_SANITIZING)
